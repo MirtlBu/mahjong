@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f59aa2a825cf1428c8312b025ec1917f, type: 3}
+  m_Name: TileVisualSettings
+  m_EditorClassIdentifier: Assembly-CSharp::TileVisualSettings
+  bodyMaterial: {fileID: 2100000, guid: 66a6dbc63bd3047e6b0ce8e0aa79ce8a, type: 2}
+  faceMaterial: {fileID: 2100000, guid: cdad0ecdd13084f808d6b5cb573fc73f, type: 2}
+  useAtlas: 1
+  atlasColumns: 6
+  atlasRows: 6
+  charactersColor: {r: 0.85, g: 0.25, b: 0.2, a: 1}
+  bambooColor: {r: 0.15, g: 0.65, b: 0.25, a: 1}
+  circlesColor: {r: 0.15, g: 0.35, b: 0.85, a: 1}
+  windsColor: {r: 0.75, g: 0.65, b: 0.1, a: 1}
+  dragonsColor: {r: 0.6, g: 0.1, b: 0.75, a: 1}
