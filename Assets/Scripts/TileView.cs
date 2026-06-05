@@ -54,7 +54,7 @@ public class TileView : MonoBehaviour
         if (IsSelected)
             bodyColor = Color.Lerp(baseColor, new Color(1f, 0.85f, 0f), 0.55f);
         else if (!isFree)
-            bodyColor = baseColor * 0.45f;
+            bodyColor = baseColor * 0.8f;
         else
             bodyColor = baseColor;
 
@@ -66,7 +66,7 @@ public class TileView : MonoBehaviour
         if (tileRenderer.sharedMaterials.Length > 1)
         {
             tileRenderer.GetPropertyBlock(facePropBlock, 1);
-            Color faceColor = isFree ? Color.white : new Color(0.5f, 0.5f, 0.5f, 1f);
+            Color faceColor = isFree ? Color.white : new Color(0.8f, 0.8f, 0.8f, 1f);
             facePropBlock.SetColor("_BaseColor", faceColor);
             tileRenderer.SetPropertyBlock(facePropBlock, 1);
         }
