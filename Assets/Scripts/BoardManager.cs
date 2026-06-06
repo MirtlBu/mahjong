@@ -56,7 +56,7 @@ public class BoardManager : MonoBehaviour
         float worldY = y * tileHeight * 0.5f;
         float worldZ = -layer * tileDepth;
 
-        GameObject go = Instantiate(tilePrefab, new Vector3(worldX, worldY, worldZ), Quaternion.Euler(-90f, 0f, 0f));
+        GameObject go = Instantiate(tilePrefab, new Vector3(worldX, worldY, worldZ), Quaternion.identity);
 
         TileView view = go.GetComponent<TileView>();
         view.SetData(data);

@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5ef7f12c84b4493eab75c14f94f2d4e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BoardManager
-  tilePrefab: {fileID: 8055482382957520996, guid: 84241f41de5e74b369eee2746921a129, type: 3}
+  tilePrefab: {fileID: 7902098572919407474, guid: 0fecc471dc857454cbe07dda9878b16e, type: 3}
   tileWidth: 2
   tileHeight: 3
   tileDepth: 1

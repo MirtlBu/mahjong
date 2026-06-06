@@ -52,7 +52,7 @@ public class TileView : MonoBehaviour
 
         Color bodyColor;
         if (IsSelected)
-            bodyColor = Color.Lerp(baseColor, new Color(1f, 0.85f, 0f), 0.55f);
+            bodyColor = Color.Lerp(baseColor, new Color(0.3f, 0.8f, 0.2f), 0.55f);
         else if (!isFree)
             bodyColor = baseColor * 0.8f;
         else

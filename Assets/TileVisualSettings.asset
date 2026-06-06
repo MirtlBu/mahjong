@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f59aa2a825cf1428c8312b025ec1917f, type: 3}
   m_Name: TileVisualSettings
   m_EditorClassIdentifier: Assembly-CSharp::TileVisualSettings
-  bodyMaterial: {fileID: 2100000, guid: 66a6dbc63bd3047e6b0ce8e0aa79ce8a, type: 2}
+  bodyMaterial: {fileID: 2100000, guid: 3180dc45967a641bdbaa5dde5d420790, type: 2}
   faceMaterial: {fileID: 2100000, guid: 6041ca4e6ecb8450286efe443a1c8869, type: 2}
   useAtlas: 1
   atlasColumns: 6
