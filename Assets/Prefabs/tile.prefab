@@ -58,7 +58,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 6041ca4e6ecb8450286efe443a1c8869, type: 2}
     - target: {fileID: 919132149155446097, guid: f92dbd4cb0a594b209b0e9d88dfcb8d3, type: 3}
       propertyPath: m_Name
-      value: test_cube2
+      value: tile
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -115,3 +115,6 @@ MonoBehaviour:
   boardX: 0
   boardY: 0
   boardLayer: 0
+  blockedTint: {r: 0.4716981, g: 0.25171643, b: 0.0022249965, a: 0.69411767}
+  selectedTint: {r: 0, g: 0.5949769, b: 0.6792453, a: 1}
+  hintColor: {r: 0.003921569, g: 0.59607846, b: 0.6784314, a: 1}

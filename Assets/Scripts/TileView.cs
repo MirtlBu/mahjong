@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class TileView : MonoBehaviour
@@ -8,6 +9,10 @@ public class TileView : MonoBehaviour
     private Renderer tileRenderer;
     private MaterialPropertyBlock propBlock;
     private MaterialPropertyBlock facePropBlock;
+
+    [SerializeField] private Color blockedTint    = new Color(0.5f, 0.5f, 0.7f, 1f);
+    [SerializeField] private Color selectedTint   = new Color(0.3f, 0.8f, 0.2f, 1f);
+    [SerializeField] private Color hintColor      = new Color(1f, 0.9f, 0f, 1f);
 
     private Color baseColor = Color.white;
     private bool isFree = true;
@@ -47,14 +52,13 @@ public class TileView : MonoBehaviour
 
     void ApplyVisualState()
     {
-        // Тело тайла (материал 0) — цветовой тинт для выделения/блокировки
         tileRenderer.GetPropertyBlock(propBlock, 0);
 
         Color bodyColor;
         if (IsSelected)
-            bodyColor = Color.Lerp(baseColor, new Color(0.3f, 0.8f, 0.2f), 0.55f);
+            bodyColor = Color.Lerp(baseColor, selectedTint, 0.55f);
         else if (!isFree)
-            bodyColor = baseColor * 0.8f;
+            bodyColor = Color.Lerp(baseColor, blockedTint, 0.5f);
         else
             bodyColor = baseColor;
 
@@ -62,13 +66,45 @@ public class TileView : MonoBehaviour
         propBlock.SetColor("_BaseColor", bodyColor);
         tileRenderer.SetPropertyBlock(propBlock, 0);
 
-        // Лицевая часть (материал 1) — только затемняем когда заблокирован, иконка всегда читаема
         if (tileRenderer.sharedMaterials.Length > 1)
         {
             tileRenderer.GetPropertyBlock(facePropBlock, 1);
-            Color faceColor = isFree ? Color.white : new Color(0.8f, 0.8f, 0.8f, 1f);
+            Color faceColor;
+            if (IsSelected)
+                faceColor = Color.Lerp(Color.white, selectedTint, 0.3f);
+            else if (!isFree)
+                faceColor = new Color(0.8f, 0.8f, 0.8f, 1f);
+            else
+                faceColor = Color.white;
             facePropBlock.SetColor("_BaseColor", faceColor);
             tileRenderer.SetPropertyBlock(facePropBlock, 1);
+        }
+    }
+
+    public void Blink(int times = 2)
+    {
+        StartCoroutine(BlinkCoroutine(times));
+    }
+
+    IEnumerator BlinkCoroutine(int times)
+    {
+        for (int i = 0; i < times; i++)
+        {
+            tileRenderer.GetPropertyBlock(propBlock, 0);
+            propBlock.SetColor("_BaseColor", Color.Lerp(baseColor, hintColor, 0.55f));
+            tileRenderer.SetPropertyBlock(propBlock, 0);
+
+            if (tileRenderer.sharedMaterials.Length > 1)
+            {
+                tileRenderer.GetPropertyBlock(facePropBlock, 1);
+                facePropBlock.SetColor("_BaseColor", Color.Lerp(Color.white, hintColor, 0.3f));
+                tileRenderer.SetPropertyBlock(facePropBlock, 1);
+            }
+
+            yield return new WaitForSeconds(0.35f);
+
+            ApplyVisualState();
+            yield return new WaitForSeconds(0.25f);
         }
     }
 

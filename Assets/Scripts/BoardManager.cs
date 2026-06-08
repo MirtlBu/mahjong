@@ -5,19 +5,22 @@ public class BoardManager : MonoBehaviour
 {
     public static BoardManager Instance { get; private set; }
 
-    [Header("Тайл")]
+    [Header("Tile")]
     public GameObject tilePrefab;
     public float tileWidth  = 2.0f;
     public float tileHeight = 3.0f;
     public float tileDepth  = 1.05f;
 
-    [Header("Визуальные настройки")]
+    [Header("Visual Settings")]
     public TileVisualSettings visualSettings;
+
+    [Header("Scoring")]
+    public int pointsPerMatch = 5;
 
     private List<TileView> allTiles = new List<TileView>();
     private TileView selectedTile;
+    private int score;
 
-    // 34 инстанса faceMaterial с разными UV (один на тип тайла)
     private Material[] atlasMaterials;
 
     void Awake()
@@ -66,24 +69,10 @@ public class BoardManager : MonoBehaviour
             var rend = go.GetComponentInChildren<Renderer>();
             if (rend == null)
             {
-                Debug.LogError("Tile prefab не имеет Renderer — пересоздай префаб из FBX.");
+                Debug.LogError("Tile prefab has no Renderer — recreate the prefab from the FBX.");
                 return;
             }
-            var mats = rend.sharedMaterials;
-            if (visualSettings.bodyMaterial != null && mats.Length > 0)
-                mats[0] = visualSettings.bodyMaterial;
-
-            if (visualSettings.useAtlas && atlasMaterials != null && mats.Length > 1)
-            {
-                mats[1] = atlasMaterials[visualSettings.GetAtlasIndex(data)];
-                rend.sharedMaterials = mats;
-                view.SetSelected(false);
-            }
-            else
-            {
-                rend.sharedMaterials = mats;
-                view.SetBaseColor(visualSettings.GetBaseColor(data));
-            }
+            ApplyTileVisuals(view, rend, data);
         }
 
         view.boardX     = x;
@@ -123,6 +112,10 @@ public class BoardManager : MonoBehaviour
             Destroy(selectedTile.gameObject);
             Destroy(tile.gameObject);
             selectedTile = null;
+
+            score += pointsPerMatch;
+            GameHUD.Instance?.SetScore(score);
+
             RefreshFreeStates();
             CheckWinLose();
         }
@@ -131,6 +124,20 @@ public class BoardManager : MonoBehaviour
             selectedTile.SetSelected(false);
             selectedTile = null;
         }
+    }
+
+    public void ShowHint()
+    {
+        var freeTiles = allTiles.FindAll(t => IsFree(t));
+        for (int i = 0; i < freeTiles.Count; i++)
+            for (int j = i + 1; j < freeTiles.Count; j++)
+                if (freeTiles[i].data.Matches(freeTiles[j].data))
+                {
+                    freeTiles[i].Blink();
+                    freeTiles[j].Blink();
+                    return;
+                }
+        Debug.Log("No hints available");
     }
 
     public bool IsFree(TileView tile)
@@ -171,7 +178,7 @@ public class BoardManager : MonoBehaviour
     {
         if (allTiles.Count == 0)
         {
-            Debug.Log("WIN!");
+            Debug.Log("You win!");
             return;
         }
 
@@ -181,7 +188,7 @@ public class BoardManager : MonoBehaviour
                 if (freeTiles[i].data.Matches(freeTiles[j].data))
                     return;
 
-        Debug.Log("NO MOVES — LOSE!");
+        Debug.Log("No moves left — game over!");
     }
 
     List<TileData> GenerateTileSet()
@@ -202,6 +209,53 @@ public class BoardManager : MonoBehaviour
                 tiles.Add(new TileData(TileSuit.Dragons, v));
 
         return tiles;
+    }
+
+    public void Shuffle()
+    {
+        if (selectedTile != null)
+        {
+            selectedTile.SetSelected(false);
+            selectedTile = null;
+        }
+
+        var dataList = new List<TileData>();
+        foreach (var tile in allTiles)
+            dataList.Add(tile.data);
+
+        ShuffleTiles(dataList);
+
+        for (int i = 0; i < allTiles.Count; i++)
+        {
+            allTiles[i].SetData(dataList[i]);
+            if (visualSettings != null)
+            {
+                var rend = allTiles[i].GetComponentInChildren<Renderer>();
+                if (rend != null)
+                    ApplyTileVisuals(allTiles[i], rend, dataList[i]);
+            }
+        }
+
+        RefreshFreeStates();
+    }
+
+    void ApplyTileVisuals(TileView view, Renderer rend, TileData data)
+    {
+        var mats = rend.sharedMaterials;
+        if (visualSettings.bodyMaterial != null && mats.Length > 0)
+            mats[0] = visualSettings.bodyMaterial;
+
+        if (visualSettings.useAtlas && atlasMaterials != null && mats.Length > 1)
+        {
+            mats[1] = atlasMaterials[visualSettings.GetAtlasIndex(data)];
+            rend.sharedMaterials = mats;
+            view.SetSelected(false);
+        }
+        else
+        {
+            rend.sharedMaterials = mats;
+            view.SetBaseColor(visualSettings.GetBaseColor(data));
+        }
     }
 
     void ShuffleTiles(List<TileData> tiles)

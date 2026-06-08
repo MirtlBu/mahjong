@@ -1,20 +1,19 @@
 using UnityEngine;
 
-// Тип масти плитки
 public enum TileSuit
 {
-    Characters, // Иероглифы (1-9)
-    Bamboo,     // Бамбук (1-9)
-    Circles,    // Круги (1-9)
-    Winds,      // Ветра (4 штуки)
-    Dragons     // Драконы (3 штуки)
+    Characters, // 1-9
+    Bamboo,     // 1-9
+    Circles,    // 1-9
+    Winds,      // 1-4
+    Dragons     // 1-3
 }
 
 [System.Serializable]
 public class TileData
 {
     public TileSuit suit;
-    public int value; // 1-9 для Characters/Bamboo/Circles, 1-4 для Winds, 1-3 для Dragons
+    public int value; // 1-9 for Characters/Bamboo/Circles, 1-4 for Winds, 1-3 for Dragons
 
     public TileData(TileSuit suit, int value)
     {
@@ -22,7 +21,6 @@ public class TileData
         this.value = value;
     }
 
-    // Две плитки совпадают если масть и значение одинаковые
     public bool Matches(TileData other)
     {
         return suit == other.suit && value == other.value;
