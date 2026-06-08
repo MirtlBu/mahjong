@@ -16,6 +16,7 @@ public class BoardManager : MonoBehaviour
 
     [Header("Scoring")]
     public int pointsPerMatch = 5;
+    public int winBonus = 100;
 
     private List<TileView> allTiles = new List<TileView>();
     private TileView selectedTile;
@@ -26,6 +27,23 @@ public class BoardManager : MonoBehaviour
     void Awake()
     {
         Instance = this;
+    }
+
+    void Update()
+    {
+#if UNITY_EDITOR
+        if (Input.GetKeyDown(KeyCode.W))
+            DebugTriggerWin();
+#endif
+    }
+
+    [ContextMenu("Debug: Trigger Win")]
+    void DebugTriggerWin()
+    {
+        int baseScore = score;
+        score += winBonus;
+        GameHUD.Instance?.SetScore(score);
+        GameHUD.Instance?.ShowVictory(baseScore, score);
     }
 
     void Start()
@@ -178,7 +196,11 @@ public class BoardManager : MonoBehaviour
     {
         if (allTiles.Count == 0)
         {
-            Debug.Log("You win!");
+            int baseScore = score;
+            score += winBonus;
+            GameHUD.Instance?.SetScore(score);
+            GameHUD.Instance?.ShowVictory(baseScore, score);
+            Debug.Log($"You win! Final score: {score}");
             return;
         }
 
