@@ -13,6 +13,10 @@ public class GameHUD : MonoBehaviour
     [Header("Score")]
     [SerializeField] private TMP_Text scoreLabel;
 
+    [Header("Resource Counts")]
+    [SerializeField] private TMP_Text hintCountLabel;
+    [SerializeField] private TMP_Text shuffleCountLabel;
+
     [Header("Victory")]
     [SerializeField] private GameObject victoryPanel;
     [SerializeField] private TMP_Text victoryScoreLabel;
@@ -34,12 +38,35 @@ public class GameHUD : MonoBehaviour
 
         var shuffle = shuffleButtonObject?.GetComponentInChildren<ButtonView>();
         if (shuffle != null) shuffle.OnClick += () => BoardManager.Instance?.Shuffle();
+
+        RefreshResourceCounts();
+    }
+
+    public void RefreshResourceCounts()
+    {
+        var gm = GameManager.Instance;
+        if (hintCountLabel    != null) hintCountLabel.text    = gm != null ? $"x{gm.HintCount}"    : "";
+        if (shuffleCountLabel != null) shuffleCountLabel.text = gm != null ? $"x{gm.ShuffleCount}" : "";
     }
 
     public void SetScore(int score)
     {
         if (scoreLabel != null)
             scoreLabel.text = score.ToString();
+    }
+
+    public void ResetForNewLevel()
+    {
+        if (victoryPanel != null)
+            victoryPanel.SetActive(false);
+        if (scoreLabel != null)
+            scoreLabel.text = "0";
+    }
+
+    public void HideVictory()
+    {
+        if (victoryPanel != null)
+            victoryPanel.SetActive(false);
     }
 
     public void ShowVictory(int fromScore, int toScore)

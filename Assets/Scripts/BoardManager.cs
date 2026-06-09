@@ -38,18 +38,36 @@ public class BoardManager : MonoBehaviour
     }
 
     [ContextMenu("Debug: Trigger Win")]
-    void DebugTriggerWin()
+    public void DebugTriggerWin()
     {
         int baseScore = score;
         score += winBonus;
         GameHUD.Instance?.SetScore(score);
         GameHUD.Instance?.ShowVictory(baseScore, score);
+        GameManager.Instance?.OnLevelComplete(score);
     }
 
     void Start()
     {
         if (visualSettings != null && visualSettings.useAtlas)
             atlasMaterials = visualSettings.BuildAtlasMaterials();
+
+        BuildBoard();
+    }
+
+    public void Rebuild()
+    {
+        if (selectedTile != null)
+        {
+            selectedTile.SetSelected(false);
+            selectedTile = null;
+        }
+
+        foreach (var tile in allTiles)
+            if (tile != null) Destroy(tile.gameObject);
+
+        allTiles.Clear();
+        score = 0;
 
         BuildBoard();
     }
@@ -146,6 +164,12 @@ public class BoardManager : MonoBehaviour
 
     public void ShowHint()
     {
+        if (GameManager.Instance != null && !GameManager.Instance.UseHint())
+        {
+            Debug.Log("No hints remaining");
+            return;
+        }
+
         var freeTiles = allTiles.FindAll(t => IsFree(t));
         for (int i = 0; i < freeTiles.Count; i++)
             for (int j = i + 1; j < freeTiles.Count; j++)
@@ -200,6 +224,7 @@ public class BoardManager : MonoBehaviour
             score += winBonus;
             GameHUD.Instance?.SetScore(score);
             GameHUD.Instance?.ShowVictory(baseScore, score);
+            GameManager.Instance?.OnLevelComplete(score);
             Debug.Log($"You win! Final score: {score}");
             return;
         }
@@ -235,6 +260,12 @@ public class BoardManager : MonoBehaviour
 
     public void Shuffle()
     {
+        if (GameManager.Instance != null && !GameManager.Instance.UseShuffle())
+        {
+            Debug.Log("No shuffles remaining");
+            return;
+        }
+
         if (selectedTile != null)
         {
             selectedTile.SetSelected(false);
