@@ -28,7 +28,7 @@ public class MapSceneUI : MonoBehaviour
         }
 
         levelMap?.Build(GameManager.Instance.Levels);
-        levelMap?.Show(GameManager.Instance.CurrentLevelIndex);
+        levelMap?.Show();
 
         buyHintButton?.onClick.AddListener(OnBuyHint);
         buyShuffleButton?.onClick.AddListener(OnBuyShuffle);

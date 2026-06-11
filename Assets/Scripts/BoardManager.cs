@@ -103,12 +103,15 @@ public class BoardManager : MonoBehaviour
 
     void BuildBoard()
     {
-        List<TileData> tileSet = GenerateTileSet();
+        var levelLayout = GameManager.Instance?.CurrentLevel;
+        List<Vector3Int> layout = levelLayout != null
+            ? levelLayout.GetPositions()
+            : TurtleLayout.GetPositions();
+
+        List<TileData> tileSet = GenerateTileSet(layout.Count);
         ShuffleTiles(tileSet);
 
-        List<Vector3Int> layout = TurtleLayout.GetPositions();
-
-        int count = Mathf.Min(layout.Count, tileSet.Count);
+        int count = tileSet.Count; // may be layout.Count-1 if layout has odd number of positions
         for (int i = 0; i < count; i++)
         {
             Vector3Int pos = layout[i];
@@ -267,28 +270,49 @@ public class BoardManager : MonoBehaviour
         Debug.Log("CheckWinLose: no valid pairs found");
         var gm = GameManager.Instance;
         bool hasShuffles = gm == null || gm.ShuffleCount > 0;
-        GameHUD.Instance?.ShowNoMoves(!hasShuffles);
-        if (!hasShuffles)
+        bool shuffleUseless = IsShuffleUseless();
+        bool gameOver = !hasShuffles || shuffleUseless;
+        GameHUD.Instance?.ShowNoMoves(gameOver);
+        if (gameOver)
             gm?.OnGameOver();
     }
 
-    List<TileData> GenerateTileSet()
+    bool IsShuffleUseless()
     {
-        var tiles = new List<TileData>();
+        // No free tiles at all — shuffle only moves data, positions stay the same
+        if (!allTiles.Exists(t => IsFree(t)))
+            return true;
 
+        // Exactly 2 tiles left — if they could match they'd have been found already
+        if (allTiles.Count == 2)
+            return true;
+
+        return false;
+    }
+
+    List<TileData> GenerateTileSet(int count)
+    {
+        // Build pool of unique tile types
+        var types = new List<TileData>();
         foreach (TileSuit suit in new[] { TileSuit.Characters, TileSuit.Bamboo, TileSuit.Circles })
             for (int v = 1; v <= 9; v++)
-                for (int c = 0; c < 4; c++)
-                    tiles.Add(new TileData(suit, v));
-
+                types.Add(new TileData(suit, v));
         for (int v = 1; v <= 4; v++)
-            for (int c = 0; c < 4; c++)
-                tiles.Add(new TileData(TileSuit.Winds, v));
-
+            types.Add(new TileData(TileSuit.Winds, v));
         for (int v = 1; v <= 3; v++)
-            for (int c = 0; c < 4; c++)
-                tiles.Add(new TileData(TileSuit.Dragons, v));
+            types.Add(new TileData(TileSuit.Dragons, v));
 
+        // Generate exactly count tiles in pairs, cycling through types
+        count = (count / 2) * 2; // ensure even
+        var tiles = new List<TileData>(count);
+        int typeIndex = 0;
+        while (tiles.Count < count)
+        {
+            var t = types[typeIndex % types.Count];
+            tiles.Add(new TileData(t.suit, t.value));
+            tiles.Add(new TileData(t.suit, t.value));
+            typeIndex++;
+        }
         return tiles;
     }
 

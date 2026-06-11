@@ -7,13 +7,12 @@ public class LevelMapUI : MonoBehaviour
     [SerializeField] private GameObject mapPanel;
     [SerializeField] private LevelNodeUI nodePrefab;
     [SerializeField] private RectTransform nodeContainer;
-    [SerializeField] private RectTransform playerMarker;
     [SerializeField] private GameObject dashPrefab;   // small dot/dash Image prefab
     [SerializeField] private int dashesPerSegment = 8;
 
     private LevelNodeUI[] spawnedNodes;
 
-    public void Build(LevelConfig[] levels)
+    public void Build(LayoutSO[] levels)
     {
         Debug.Log($"LevelMapUI.Build: levels={levels?.Length}, nodePrefab={nodePrefab}, nodeContainer={nodeContainer}");
         if (nodePrefab == null || nodeContainer == null || levels == null || levels.Length == 0) return;
@@ -35,20 +34,12 @@ public class LevelMapUI : MonoBehaviour
         }
     }
 
-    public void Show(int currentLevelIndex)
+    public void Show()
     {
         mapPanel.SetActive(true);
 
         foreach (var node in spawnedNodes)
             node?.Refresh();
-
-        if (playerMarker != null && spawnedNodes != null &&
-            currentLevelIndex >= 0 && currentLevelIndex < spawnedNodes.Length)
-        {
-            var nodeRect = spawnedNodes[currentLevelIndex].GetComponent<RectTransform>();
-            playerMarker.anchoredPosition = nodeRect.anchoredPosition + new Vector2(0, 60);
-            playerMarker.SetAsLastSibling();
-        }
     }
 
     public void Hide()

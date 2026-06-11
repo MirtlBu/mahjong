@@ -8,12 +8,11 @@ public class LevelNodeUI : MonoBehaviour
     [SerializeField] private TMP_Text levelNameLabel;
     [SerializeField] private Image previewImage;
     [SerializeField] private GameObject lockOverlay;
-    [SerializeField] private GameObject completedMark;
     [SerializeField] private Button button;
 
-    private LevelConfig config;
+    private LayoutSO config;
 
-    public void Setup(LevelConfig cfg, int index)
+    public void Setup(LayoutSO cfg, int index)
     {
         config = cfg;
         levelIndex = index;
@@ -32,10 +31,8 @@ public class LevelNodeUI : MonoBehaviour
     public void Refresh()
     {
         bool unlocked = LevelProgress.IsUnlocked(levelIndex);
-        bool completed = LevelProgress.IsCompleted(levelIndex);
 
         if (lockOverlay != null) lockOverlay.SetActive(!unlocked);
-        if (completedMark != null) completedMark.SetActive(completed);
         if (button != null) button.interactable = unlocked;
     }
 }

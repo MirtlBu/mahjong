@@ -7,7 +7,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     [Header("Levels")]
-    [SerializeField] private LevelConfig[] levels;
+    [SerializeField] private LayoutSO[] levels;
 
     [Header("Scene Names")]
     [SerializeField] private string mapSceneName  = "MapScene";
@@ -25,7 +25,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float victoryToMapDelay = 3f;
 
     public int CurrentLevelIndex { get; private set; } = -1;
-    public LevelConfig[] Levels  => levels;
+    public LayoutSO[] Levels  => levels;
+    public LayoutSO CurrentLevel => (CurrentLevelIndex >= 0 && CurrentLevelIndex < levels.Length)
+        ? levels[CurrentLevelIndex] : null;
 
     public int TotalScore   { get; private set; }
     public int HintCount    { get; private set; }
