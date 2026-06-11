@@ -18,13 +18,22 @@ public class MapSceneUI : MonoBehaviour
 
     void Start()
     {
-        if (GameManager.Instance == null) return;
+        Debug.Log($"[MapSceneUI] Start — GameManager.Instance={GameManager.Instance}");
+        Debug.Log($"[MapSceneUI] buyHintButton={buyHintButton}, buyShuffleButton={buyShuffleButton}");
+
+        if (GameManager.Instance == null)
+        {
+            Debug.LogWarning("[MapSceneUI] GameManager.Instance is NULL — listeners not added!");
+            return;
+        }
 
         levelMap?.Build(GameManager.Instance.Levels);
         levelMap?.Show(GameManager.Instance.CurrentLevelIndex);
 
         buyHintButton?.onClick.AddListener(OnBuyHint);
         buyShuffleButton?.onClick.AddListener(OnBuyShuffle);
+
+        Debug.Log($"[MapSceneUI] TotalScore={GameManager.Instance.TotalScore}, hintCost={GameManager.Instance.hintCost}");
 
         Refresh();
     }
@@ -44,11 +53,15 @@ public class MapSceneUI : MonoBehaviour
 
     void OnBuyHint()
     {
+        Debug.Log($"[MapSceneUI] OnBuyHint — score={GameManager.Instance?.TotalScore}, cost={GameManager.Instance?.hintCost}");
         if (GameManager.Instance.BuyHint()) Refresh();
+        else Debug.LogWarning("[MapSceneUI] BuyHint failed (not enough score?)");
     }
 
     void OnBuyShuffle()
     {
+        Debug.Log($"[MapSceneUI] OnBuyShuffle — score={GameManager.Instance?.TotalScore}, cost={GameManager.Instance?.shuffleCost}");
         if (GameManager.Instance.BuyShuffle()) Refresh();
+        else Debug.LogWarning("[MapSceneUI] BuyShuffle failed (not enough score?)");
     }
 }

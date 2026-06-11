@@ -1144,7 +1144,7 @@ Transform:
   m_GameObject: {fileID: 593335836}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalPosition: {x: 0, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2128,7 +2128,7 @@ Canvas:
   m_GameObject: {fileID: 1979925373}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 1
+  m_RenderMode: 0
   m_Camera: {fileID: 593335838}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
@@ -2140,7 +2140,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_TargetDisplay: 0
 --- !u!224 &1979925377
 RectTransform:
@@ -2198,8 +2198,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5581445addc3848c6b6bc73d6999c895, type: 2}
   mapSceneName: MapScene
   gameSceneName: GameScene
-  startingHints: 5
-  startingShuffles: 1
+  startingHints: 99
+  startingShuffles: 50
   hintCost: 100
   shuffleCost: 200
   victoryToMapDelay: 3
@@ -2250,7 +2250,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bba710cad3420412eaaa3f6d5a904a4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapSceneUI
-  totalScoreLabel: {fileID: 0}
+  totalScoreLabel: {fileID: 1530252765}
   hintCountLabel: {fileID: 645715584}
   shuffleCountLabel: {fileID: 1045205501}
   buyHintButton: {fileID: 223351564}

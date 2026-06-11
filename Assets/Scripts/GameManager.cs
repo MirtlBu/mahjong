@@ -37,6 +37,17 @@ public class GameManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
         LoadProgress();
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        GameHUD.Instance?.RefreshResourceCounts();
     }
 
     // ── Progress persistence ──────────────────────────────────────
@@ -63,6 +74,12 @@ public class GameManager : MonoBehaviour
         if (index < 0 || index >= levels.Length) return;
         CurrentLevelIndex = index;
         SceneManager.LoadScene(gameSceneName);
+    }
+
+    public void OnGameOver()
+    {
+        SaveProgress();
+        StartCoroutine(ReturnToMapAfterDelay());
     }
 
     public void OnLevelComplete(int levelScore)
@@ -130,10 +147,5 @@ public class GameManager : MonoBehaviour
         Debug.Log("All progress reset");
     }
 
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.W))
-            BoardManager.Instance?.DebugTriggerWin();
-    }
 #endif
 }

@@ -17,6 +17,9 @@ public class GameHUD : MonoBehaviour
     [SerializeField] private TMP_Text hintCountLabel;
     [SerializeField] private TMP_Text shuffleCountLabel;
 
+    [Header("No Moves")]
+    [SerializeField] private TMP_Text noMovesLabel;
+
     [Header("Victory")]
     [SerializeField] private GameObject victoryPanel;
     [SerializeField] private TMP_Text victoryScoreLabel;
@@ -29,6 +32,8 @@ public class GameHUD : MonoBehaviour
 
         if (victoryPanel != null)
             victoryPanel.SetActive(false);
+        if (noMovesLabel != null)
+            noMovesLabel.gameObject.SetActive(false);
     }
 
     void Start()
@@ -45,8 +50,27 @@ public class GameHUD : MonoBehaviour
     public void RefreshResourceCounts()
     {
         var gm = GameManager.Instance;
-        if (hintCountLabel    != null) hintCountLabel.text    = gm != null ? $"x{gm.HintCount}"    : "";
-        if (shuffleCountLabel != null) shuffleCountLabel.text = gm != null ? $"x{gm.ShuffleCount}" : "";
+        if (hintCountLabel    != null) hintCountLabel.text    = gm != null ? $"{gm.HintCount}"    : "";
+        if (shuffleCountLabel != null) shuffleCountLabel.text = gm != null ? $"{gm.ShuffleCount}" : "";
+    }
+
+    public void ShowNoMoves(bool isGameOver)
+    {
+        if (noMovesLabel == null) return;
+        var canvas = noMovesLabel.GetComponentInParent<Canvas>(true);
+        if (canvas != null)
+        {
+            canvas.gameObject.SetActive(true);
+            foreach (var t in canvas.GetComponentsInChildren<TMP_Text>(true))
+                t.gameObject.SetActive(t == noMovesLabel);
+        }
+        noMovesLabel.gameObject.SetActive(true);
+        noMovesLabel.text = isGameOver ? GameStrings.GameOver : GameStrings.NoMovesUseShuffle;
+    }
+
+    public void HideNoMoves()
+    {
+        if (noMovesLabel != null) noMovesLabel.gameObject.SetActive(false);
     }
 
     public void SetScore(int score)
@@ -72,7 +96,13 @@ public class GameHUD : MonoBehaviour
     public void ShowVictory(int fromScore, int toScore)
     {
         if (victoryPanel != null)
+        {
             victoryPanel.SetActive(true);
+            foreach (var t in victoryPanel.GetComponentsInChildren<TMP_Text>(true))
+                t.gameObject.SetActive(t != noMovesLabel);
+        }
+        if (noMovesLabel != null)
+            noMovesLabel.gameObject.SetActive(false);
 
         foreach (var ps in confettiSystems)
             if (ps != null) ps.Play();
@@ -89,10 +119,10 @@ public class GameHUD : MonoBehaviour
             float t = Mathf.SmoothStep(0f, 1f, elapsed / duration);
             int current = Mathf.RoundToInt(Mathf.Lerp(from, to, t));
             if (victoryScoreLabel != null)
-                victoryScoreLabel.text = $"Score: {current}";
+                victoryScoreLabel.text = string.Format(GameStrings.ScoreFormat, current);
             yield return null;
         }
         if (victoryScoreLabel != null)
-            victoryScoreLabel.text = $"Score: {to}";
+            victoryScoreLabel.text = string.Format(GameStrings.ScoreFormat, to);
     }
 }

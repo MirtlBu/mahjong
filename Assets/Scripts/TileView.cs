@@ -6,6 +6,8 @@ public class TileView : MonoBehaviour
     [HideInInspector] public TileData data;
     [HideInInspector] public int boardX, boardY, boardLayer;
 
+    [SerializeField] private ParticleSystem deathParticles;
+
     private Renderer tileRenderer;
     private MaterialPropertyBlock propBlock;
     private MaterialPropertyBlock facePropBlock;
@@ -106,6 +108,24 @@ public class TileView : MonoBehaviour
             ApplyVisualState();
             yield return new WaitForSeconds(0.25f);
         }
+    }
+
+    public void PlayDeathEffect()
+    {
+        var col = GetComponent<Collider>();
+        if (col != null) col.enabled = false;
+        StartCoroutine(DeathCoroutine());
+    }
+
+    IEnumerator DeathCoroutine()
+    {
+        tileRenderer.enabled = false;
+        if (deathParticles != null)
+        {
+            deathParticles.Play();
+            yield return new WaitUntil(() => !deathParticles.IsAlive(true));
+        }
+        Destroy(gameObject);
     }
 
     void OnMouseUp()

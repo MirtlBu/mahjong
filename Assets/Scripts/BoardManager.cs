@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -33,7 +34,7 @@ public class BoardManager : MonoBehaviour
     {
 #if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.W))
-            DebugTriggerWin();
+            StartCoroutine(SolveCoroutine());
 #endif
     }
 
@@ -45,6 +46,34 @@ public class BoardManager : MonoBehaviour
         GameHUD.Instance?.SetScore(score);
         GameHUD.Instance?.ShowVictory(baseScore, score);
         GameManager.Instance?.OnLevelComplete(score);
+    }
+
+    IEnumerator SolveCoroutine()
+    {
+        while (allTiles.Count > 0)
+        {
+            var freeTiles = allTiles.FindAll(t => IsFree(t));
+            TileView tileA = null, tileB = null;
+            for (int i = 0; i < freeTiles.Count && tileA == null; i++)
+                for (int j = i + 1; j < freeTiles.Count && tileA == null; j++)
+                    if (freeTiles[i].data.Matches(freeTiles[j].data))
+                    { tileA = freeTiles[i]; tileB = freeTiles[j]; }
+
+            if (tileA == null) break;
+
+            allTiles.Remove(tileA);
+            allTiles.Remove(tileB);
+            tileA.PlayDeathEffect();
+            tileB.PlayDeathEffect();
+            score += pointsPerMatch;
+            GameHUD.Instance?.SetScore(score);
+            RefreshFreeStates();
+
+            yield return new WaitForSeconds(1f);
+        }
+
+        yield return new WaitForSeconds(0.5f);
+        CheckWinLose();
     }
 
     void Start()
@@ -145,8 +174,8 @@ public class BoardManager : MonoBehaviour
         {
             allTiles.Remove(selectedTile);
             allTiles.Remove(tile);
-            Destroy(selectedTile.gameObject);
-            Destroy(tile.gameObject);
+            selectedTile.PlayDeathEffect();
+            tile.PlayDeathEffect();
             selectedTile = null;
 
             score += pointsPerMatch;
@@ -164,22 +193,22 @@ public class BoardManager : MonoBehaviour
 
     public void ShowHint()
     {
-        if (GameManager.Instance != null && !GameManager.Instance.UseHint())
-        {
-            Debug.Log("No hints remaining");
-            return;
-        }
-
         var freeTiles = allTiles.FindAll(t => IsFree(t));
         for (int i = 0; i < freeTiles.Count; i++)
             for (int j = i + 1; j < freeTiles.Count; j++)
                 if (freeTiles[i].data.Matches(freeTiles[j].data))
                 {
+                    if (GameManager.Instance != null && !GameManager.Instance.UseHint())
+                    {
+                        Debug.Log("No hints remaining");
+                        return;
+                    }
                     freeTiles[i].Blink();
                     freeTiles[j].Blink();
                     return;
                 }
-        Debug.Log("No hints available");
+
+        GameHUD.Instance?.ShowNoMoves(false);
     }
 
     public bool IsFree(TileView tile)
@@ -235,7 +264,12 @@ public class BoardManager : MonoBehaviour
                 if (freeTiles[i].data.Matches(freeTiles[j].data))
                     return;
 
-        Debug.Log("No moves left — game over!");
+        Debug.Log("CheckWinLose: no valid pairs found");
+        var gm = GameManager.Instance;
+        bool hasShuffles = gm == null || gm.ShuffleCount > 0;
+        GameHUD.Instance?.ShowNoMoves(!hasShuffles);
+        if (!hasShuffles)
+            gm?.OnGameOver();
     }
 
     List<TileData> GenerateTileSet()
@@ -271,6 +305,8 @@ public class BoardManager : MonoBehaviour
             selectedTile.SetSelected(false);
             selectedTile = null;
         }
+
+        GameHUD.Instance?.HideNoMoves();
 
         var dataList = new List<TileData>();
         foreach (var tile in allTiles)

@@ -12,22 +12,33 @@ public class ButtonView : MonoBehaviour
 
     private Renderer btnRenderer;
     private MaterialPropertyBlock propBlock;
+    private Vector3 originalScale;
 
     void Awake()
     {
-        btnRenderer = GetComponentInChildren<Renderer>();
-        propBlock   = new MaterialPropertyBlock();
+        btnRenderer   = GetComponentInChildren<Renderer>();
+        propBlock     = new MaterialPropertyBlock();
+        originalScale = transform.localScale;
         ApplyColor(normalColor);
     }
 
     void OnMouseEnter() => ApplyColor(hoverColor);
-    void OnMouseExit()  => ApplyColor(normalColor);
+    void OnMouseExit()
+    {
+        ApplyColor(normalColor);
+        transform.localScale = originalScale;
+    }
 
-    void OnMouseDown()  => ApplyColor(pressedColor);
+    void OnMouseDown()
+    {
+        ApplyColor(pressedColor);
+        transform.localScale = originalScale * 1.05f;
+    }
 
     void OnMouseUp()
     {
         ApplyColor(hoverColor);
+        transform.localScale = originalScale;
         OnClick?.Invoke();
     }
 
