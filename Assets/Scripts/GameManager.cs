@@ -25,6 +25,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float victoryToMapDelay = 3f;
 
     public int CurrentLevelIndex { get; private set; } = -1;
+
+    private int _sessionStartHints;
+    private int _sessionStartShuffles;
     public LayoutSO[] Levels  => levels;
     public LayoutSO CurrentLevel => (CurrentLevelIndex >= 0 && CurrentLevelIndex < levels.Length)
         ? levels[CurrentLevelIndex] : null;
@@ -75,7 +78,17 @@ public class GameManager : MonoBehaviour
     {
         if (index < 0 || index >= levels.Length) return;
         CurrentLevelIndex = index;
+        _sessionStartHints    = HintCount;
+        _sessionStartShuffles = ShuffleCount;
         SceneManager.LoadScene(gameSceneName);
+    }
+
+    public void AbandonLevel()
+    {
+        HintCount    = _sessionStartHints;
+        ShuffleCount = _sessionStartShuffles;
+        SaveProgress();
+        SceneManager.LoadScene(mapSceneName);
     }
 
     public void OnGameOver()

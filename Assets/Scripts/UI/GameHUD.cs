@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 public class GameHUD : MonoBehaviour
@@ -19,6 +20,9 @@ public class GameHUD : MonoBehaviour
 
     [Header("No Moves")]
     [SerializeField] private TMP_Text noMovesLabel;
+
+    [Header("Navigation")]
+    [SerializeField] private Button backButton;
 
     [Header("Victory")]
     [SerializeField] private GameObject victoryPanel;
@@ -43,6 +47,12 @@ public class GameHUD : MonoBehaviour
 
         var shuffle = shuffleButtonObject?.GetComponentInChildren<ButtonView>();
         if (shuffle != null) shuffle.OnClick += () => BoardManager.Instance?.Shuffle();
+
+        backButton?.onClick.AddListener(() =>
+        {
+            Debug.Log("Back button clicked — abandoning level");
+            GameManager.Instance?.AbandonLevel();
+        });
 
         RefreshResourceCounts();
     }

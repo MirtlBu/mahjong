@@ -2122,10 +2122,13 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f30b20d687ede490fa2f7e0b3b395ce7, type: 2}
   - {fileID: 11400000, guid: 960c28c90ba604414ac97f1c269724b0, type: 2}
   - {fileID: 11400000, guid: 321baad7d8fed472e94f496957e405fd, type: 2}
+  - {fileID: 11400000, guid: 64a2450762621433f8119718a108d1d2, type: 2}
+  - {fileID: 11400000, guid: 909f1d1cd153c4848a10fef1499b9ce9, type: 2}
+  - {fileID: 11400000, guid: ba9e1aa4ffdbf463fa81949e13e7cd96, type: 2}
   mapSceneName: MapScene
   gameSceneName: GameScene
   startingHints: 99
-  startingShuffles: 50
+  startingShuffles: 99
   hintCost: 100
   shuffleCost: 200
   victoryToMapDelay: 3

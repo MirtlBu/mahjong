@@ -8,47 +8,41 @@ public class CrossLayoutSO : LayoutSO
     {
         var positions = new List<Vector3Int>();
 
-        // Слой 0 — форма креста (64 тайла)
+        // Layer 0 — cross shape (64 tiles)
         int[,] layer0 = {
-            // y=7
-            {0,0,0,0,1,1,1,1,0,0,0,0},
-            // y=5
-            {0,0,0,0,1,1,1,1,0,0,0,0},
-            // y=3
-            {1,1,1,1,1,1,1,1,1,1,1,1},
-            // y=1
-            {1,1,1,1,1,1,1,1,1,1,1,1},
-            // y=-1
-            {1,1,1,1,1,1,1,1,1,1,1,1},
-            // y=-3
-            {1,1,1,1,1,1,1,1,1,1,1,1},
-            // y=-5
-            {0,0,0,0,1,1,1,1,0,0,0,0},
-            // y=-7
-            {0,0,0,0,1,1,1,1,0,0,0,0},
+            {0,0,0,1,1,1,1,0,0,0},  // y= 9
+            {0,0,0,1,1,1,1,0,0,0},  // y= 7
+            {0,0,0,1,1,1,1,0,0,0},  // y= 5
+            {1,1,1,1,1,1,1,1,1,1},  // y= 3
+            {1,1,1,1,1,1,1,1,1,1},  // y= 1
+            {1,1,1,1,1,1,1,1,1,1},  // y=-1
+            {1,1,1,1,1,1,1,1,1,1},  // y=-3
+            {0,0,0,1,1,1,1,0,0,0},  // y=-5
+            {0,0,0,1,1,1,1,0,0,0},  // y=-7
+            {0,0,0,1,1,1,1,0,0,0},  // y=-9
         };
-        int[] yValues0 = { 7, 5, 3, 1, -1, -3, -5, -7 };
-        AddLayer(positions, layer0, yValues0, 0);
+        int[] y0 = { 9, 7, 5, 3, 1, -1, -3, -5, -7, -9 };
+        AddLayer(positions, layer0, y0, 0);
 
-        // Слой 1 — центральное возвышение (16 тайлов)
+        // Layer 1 — center raised (16 tiles)
         int[,] layer1 = {
-            {0,0,0,0,1,1,1,1,0,0,0,0},
-            {0,0,0,0,1,1,1,1,0,0,0,0},
-            {0,0,0,0,1,1,1,1,0,0,0,0},
-            {0,0,0,0,1,1,1,1,0,0,0,0},
+            {0,0,0,1,1,1,1,0,0,0},  // y= 3
+            {0,0,0,1,1,1,1,0,0,0},  // y= 1
+            {0,0,0,1,1,1,1,0,0,0},  // y=-1
+            {0,0,0,1,1,1,1,0,0,0},  // y=-3
         };
-        int[] yValues1 = { 3, 1, -1, -3 };
-        AddLayer(positions, layer1, yValues1, 1);
+        int[] y1 = { 3, 1, -1, -3 };
+        AddLayer(positions, layer1, y1, 1);
 
-        // Слой 2 — пик (4 тайла)
+        // Layer 2 — peak (4 tiles)
         int[,] layer2 = {
-            {0,0,0,0,0,1,1,0,0,0,0,0},
-            {0,0,0,0,0,1,1,0,0,0,0,0},
+            {0,0,0,0,1,1,0,0,0,0},  // y= 1
+            {0,0,0,0,1,1,0,0,0,0},  // y=-1
         };
-        int[] yValues2 = { 1, -1 };
-        AddLayer(positions, layer2, yValues2, 2);
+        int[] y2 = { 1, -1 };
+        AddLayer(positions, layer2, y2, 2);
 
-        return positions;
+        return positions;  // 64 + 16 + 4 = 84 tiles
     }
 
     static void AddLayer(List<Vector3Int> positions, int[,] mask, int[] yValues, int z)
@@ -56,6 +50,6 @@ public class CrossLayoutSO : LayoutSO
         for (int row = 0; row < mask.GetLength(0); row++)
             for (int col = 0; col < mask.GetLength(1); col++)
                 if (mask[row, col] == 1)
-                    positions.Add(new Vector3Int(col * 2 - 11, yValues[row], z));
+                    positions.Add(new Vector3Int(col * 2 - 9, yValues[row], z));
     }
 }

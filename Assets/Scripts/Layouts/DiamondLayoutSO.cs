@@ -8,46 +8,43 @@ public class DiamondLayoutSO : LayoutSO
     {
         var positions = new List<Vector3Int>();
 
-        // Layer 0 — diamond base (72 tiles)
+        // Layer 0 — diamond base (60 tiles)
         int[,] layer0 = {
-            {0,0,0,0,0,1,1,0,0,0,0,0},  // y= 10
-            {0,0,0,0,1,1,1,1,0,0,0,0},  // y=  8
-            {0,0,0,1,1,1,1,1,1,0,0,0},  // y=  6
-            {0,0,1,1,1,1,1,1,1,1,0,0},  // y=  4
-            {0,1,1,1,1,1,1,1,1,1,1,0},  // y=  2
-            {1,1,1,1,1,1,1,1,1,1,1,1},  // y=  0
-            {0,1,1,1,1,1,1,1,1,1,1,0},  // y= -2
-            {0,0,1,1,1,1,1,1,1,1,0,0},  // y= -4
-            {0,0,0,1,1,1,1,1,1,0,0,0},  // y= -6
-            {0,0,0,0,1,1,1,1,0,0,0,0},  // y= -8
-            {0,0,0,0,0,1,1,0,0,0,0,0},  // y=-10
+            {0,0,0,0,1,1,0,0,0,0},  // y= 9
+            {0,0,0,1,1,1,1,0,0,0},  // y= 7
+            {0,0,1,1,1,1,1,1,0,0},  // y= 5
+            {0,1,1,1,1,1,1,1,1,0},  // y= 3
+            {1,1,1,1,1,1,1,1,1,1},  // y= 1
+            {1,1,1,1,1,1,1,1,1,1},  // y=-1
+            {0,1,1,1,1,1,1,1,1,0},  // y=-3
+            {0,0,1,1,1,1,1,1,0,0},  // y=-5
+            {0,0,0,1,1,1,1,0,0,0},  // y=-7
+            {0,0,0,0,1,1,0,0,0,0},  // y=-9
         };
-        int[] yValues0 = { 10, 8, 6, 4, 2, 0, -2, -4, -6, -8, -10 };
-        AddLayer(positions, layer0, yValues0, 0);
+        int[] y0 = { 9, 7, 5, 3, 1, -1, -3, -5, -7, -9 };
+        AddLayer(positions, layer0, y0, 0);
 
-        // Layer 1 — smaller diamond (32 tiles)
+        // Layer 1 — smaller diamond (24 tiles)
         int[,] layer1 = {
-            {0,0,0,0,0,1,1,0,0,0,0,0},  // y=  6
-            {0,0,0,0,1,1,1,1,0,0,0,0},  // y=  4
-            {0,0,0,1,1,1,1,1,1,0,0,0},  // y=  2
-            {0,0,1,1,1,1,1,1,1,1,0,0},  // y=  0
-            {0,0,0,1,1,1,1,1,1,0,0,0},  // y= -2
-            {0,0,0,0,1,1,1,1,0,0,0,0},  // y= -4
-            {0,0,0,0,0,1,1,0,0,0,0,0},  // y= -6
+            {0,0,0,0,1,1,0,0,0,0},  // y= 5
+            {0,0,0,1,1,1,1,0,0,0},  // y= 3
+            {0,0,1,1,1,1,1,1,0,0},  // y= 1
+            {0,0,1,1,1,1,1,1,0,0},  // y=-1
+            {0,0,0,1,1,1,1,0,0,0},  // y=-3
+            {0,0,0,0,1,1,0,0,0,0},  // y=-5
         };
-        int[] yValues1 = { 6, 4, 2, 0, -2, -4, -6 };
-        AddLayer(positions, layer1, yValues1, 1);
+        int[] y1 = { 5, 3, 1, -1, -3, -5 };
+        AddLayer(positions, layer1, y1, 1);
 
         // Layer 2 — peak (8 tiles)
         int[,] layer2 = {
-            {0,0,0,0,0,1,1,0,0,0,0,0},  // y=  2
-            {0,0,0,0,1,1,1,1,0,0,0,0},  // y=  0
-            {0,0,0,0,0,1,1,0,0,0,0,0},  // y= -2
+            {0,0,0,1,1,1,1,0,0,0},  // y= 1
+            {0,0,0,1,1,1,1,0,0,0},  // y=-1
         };
-        int[] yValues2 = { 2, 0, -2 };
-        AddLayer(positions, layer2, yValues2, 2);
+        int[] y2 = { 1, -1 };
+        AddLayer(positions, layer2, y2, 2);
 
-        return positions;  // 72 + 32 + 8 = 112 tiles
+        return positions;  // 60 + 24 + 8 = 92 tiles
     }
 
     static void AddLayer(List<Vector3Int> positions, int[,] mask, int[] yValues, int z)
@@ -55,6 +52,6 @@ public class DiamondLayoutSO : LayoutSO
         for (int row = 0; row < mask.GetLength(0); row++)
             for (int col = 0; col < mask.GetLength(1); col++)
                 if (mask[row, col] == 1)
-                    positions.Add(new Vector3Int(col * 2 - 11, yValues[row], z));
+                    positions.Add(new Vector3Int(col * 2 - 9, yValues[row], z));
     }
 }

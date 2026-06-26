@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DiamondLayoutSO
   levelName: Diamond
   previewSprite: {fileID: 21300000, guid: 655bb380df334480da8464c82a0b9cf9, type: 3}
-  mapPosition: {x: 450, y: -365}
+  mapPosition: {x: 150, y: 150}
