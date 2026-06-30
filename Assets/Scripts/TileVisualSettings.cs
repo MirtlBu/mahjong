@@ -36,13 +36,13 @@ public class TileVisualSettings : ScriptableObject
         float tw = 1f / atlasColumns;
         float th = 1f / atlasRows;
 
-        float faceAspect = 2f / 3f; // face width/height ratio
+        float faceAspect = 1f; // images are already 2:3, matching tile face
         for (int i = 0; i < total; i++)
         {
             var mat = new Material(faceMaterial);
             int col = i % atlasColumns;
             int row = atlasRows - 1 - (i / atlasColumns); // UV снизу
-            float uniformScale = 1.2f;
+            float uniformScale = 1f;
             float scaleX = tw * faceAspect * uniformScale;
             float scaleY = th * uniformScale;
             float offsetX = col * tw + (tw - scaleX) * 0.5f; // center horizontally
