@@ -21,6 +21,7 @@ public class BoardManager : MonoBehaviour
 
     private List<TileView> allTiles = new List<TileView>();
     private TileView selectedTile;
+    private TileView hintTileA, hintTileB;
     private int score;
 
     private Material[] atlasMaterials;
@@ -149,8 +150,17 @@ public class BoardManager : MonoBehaviour
         allTiles.Add(view);
     }
 
+    void StopHintBlink()
+    {
+        hintTileA?.StopBlink();
+        hintTileB?.StopBlink();
+        hintTileA = null;
+        hintTileB = null;
+    }
+
     public void OnTileClicked(TileView tile)
     {
+        StopHintBlink();
         if (!IsFree(tile))
         {
             Debug.Log($"Tile {tile.data?.suit} {tile.data?.value} is NOT free");
@@ -206,8 +216,10 @@ public class BoardManager : MonoBehaviour
                         Debug.Log("No hints remaining");
                         return;
                     }
-                    freeTiles[i].Blink();
-                    freeTiles[j].Blink();
+                    hintTileA = freeTiles[i];
+                    hintTileB = freeTiles[j];
+                    hintTileA.Blink();
+                    hintTileB.Blink();
                     return;
                 }
 
