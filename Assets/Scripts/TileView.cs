@@ -13,8 +13,8 @@ public class TileView : MonoBehaviour
     private MaterialPropertyBlock propBlock;
     private MaterialPropertyBlock facePropBlock;
 
-    [SerializeField] private Color blockedTint    = new Color(0.5f, 0.5f, 0.7f, 1f);
-    [SerializeField] private Color selectedTint   = new Color(0.3f, 0.8f, 0.2f, 1f);
+    [SerializeField] private Color blockedTint = new Color(0.5f, 0.5f, 0.7f, 1f);
+    [SerializeField] private Color selectedTint = new Color(0.3f, 0.8f, 0.2f, 1f);
 
     private Color baseColor = Color.white;
     private bool isFree = true;
@@ -23,8 +23,8 @@ public class TileView : MonoBehaviour
 
     void Awake()
     {
-        tileRenderer  = GetComponentInChildren<Renderer>();
-        propBlock     = new MaterialPropertyBlock();
+        tileRenderer = GetComponentInChildren<Renderer>();
+        propBlock = new MaterialPropertyBlock();
         facePropBlock = new MaterialPropertyBlock();
     }
 
@@ -75,7 +75,7 @@ public class TileView : MonoBehaviour
             if (IsSelected)
                 faceColor = Color.Lerp(Color.white, selectedTint, 0.3f);
             else if (!isFree)
-                faceColor = new Color(0.8f, 0.8f, 0.8f, 1f);
+                faceColor = new Color(0.5f, 0.5f, 0.5f, 1f);
             else
                 faceColor = Color.white;
             facePropBlock.SetColor("_BaseColor", faceColor);
@@ -92,24 +92,58 @@ public class TileView : MonoBehaviour
     public void StopBlink()
     {
         if (pulsationParticles != null)
-            pulsationParticles.Stop();
+            pulsationParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
 
-    public void PlayDeathEffect()
+    public void PlayDeathEffect() => StartCoroutine(MatchAnimation(transform.position));
+
+    public void PlayMatchAnimation(Vector3 meetPoint)
     {
         var col = GetComponent<Collider>();
         if (col != null) col.enabled = false;
-        StartCoroutine(DeathCoroutine());
+        StartCoroutine(MatchAnimation(meetPoint));
     }
 
-    IEnumerator DeathCoroutine()
+    IEnumerator MatchAnimation(Vector3 meetPoint)
     {
+        Vector3 startPos = transform.position;
+        Vector3 risePos = startPos + new Vector3(0f, 0f, -5f);
+
+        // Phase 1: подлёт вперёд по Z
+        float t = 0f;
+        while (t < 1f)
+        {
+            t += Time.deltaTime / 0.2f;
+            transform.position = Vector3.Lerp(startPos, risePos, Mathf.SmoothStep(0f, 1f, t));
+            yield return null;
+        }
+
+        // Phase 2: летим к точке встречи (Z остаётся на уровне risePos)
+        Vector3 meetAtRiseZ = new Vector3(meetPoint.x, meetPoint.y, risePos.z);
+        t = 0f;
+        while (t < 1f)
+        {
+            t += Time.deltaTime / 0.35f;
+            transform.position = Vector3.Lerp(risePos, meetAtRiseZ, Mathf.SmoothStep(0f, 1f, t));
+            yield return null;
+        }
+
+        if (deathParticles != null)
+            deathParticles.Play();
+
+        // Phase 3: схлопываемся
+        t = 0f;
+        while (t < 1f)
+        {
+            t += Time.deltaTime / 0.2f;
+            float s = 1f - Mathf.SmoothStep(0f, 1f, t);
+            transform.localScale = Vector3.one * s;
+            yield return null;
+        }
+
         tileRenderer.enabled = false;
         if (deathParticles != null)
-        {
-            deathParticles.Play();
             yield return new WaitUntil(() => !deathParticles.IsAlive(true));
-        }
         Destroy(gameObject);
     }
 

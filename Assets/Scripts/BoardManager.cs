@@ -64,8 +64,9 @@ public class BoardManager : MonoBehaviour
 
             allTiles.Remove(tileA);
             allTiles.Remove(tileB);
-            tileA.PlayDeathEffect();
-            tileB.PlayDeathEffect();
+            Vector3 meet = (tileA.transform.position + tileB.transform.position) * 0.5f;
+            tileA.PlayMatchAnimation(meet);
+            tileB.PlayMatchAnimation(meet);
             score += pointsPerMatch;
             GameHUD.Instance?.SetScore(score);
             RefreshFreeStates();
@@ -187,8 +188,9 @@ public class BoardManager : MonoBehaviour
         {
             allTiles.Remove(selectedTile);
             allTiles.Remove(tile);
-            selectedTile.PlayDeathEffect();
-            tile.PlayDeathEffect();
+            Vector3 meetPoint = (selectedTile.transform.position + tile.transform.position) * 0.5f;
+            selectedTile.PlayMatchAnimation(meetPoint);
+            tile.PlayMatchAnimation(meetPoint);
             selectedTile = null;
 
             score += pointsPerMatch;
