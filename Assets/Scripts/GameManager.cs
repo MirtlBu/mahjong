@@ -22,7 +22,8 @@ public class GameManager : MonoBehaviour
     public int shuffleCost = 200;
 
     [Header("Victory")]
-    [SerializeField] private float victoryToMapDelay = 3f;
+    [SerializeField] private float victoryToMapDelay  = 3f;
+    [SerializeField] private float gameOverToMapDelay = 5f;
 
     public int CurrentLevelIndex { get; private set; } = -1;
 
@@ -94,7 +95,7 @@ public class GameManager : MonoBehaviour
     public void OnGameOver()
     {
         SaveProgress();
-        StartCoroutine(ReturnToMapAfterDelay());
+        StartCoroutine(ReturnToMapAfterDelay(gameOverToMapDelay));
     }
 
     public void OnLevelComplete(int levelScore)
@@ -102,12 +103,12 @@ public class GameManager : MonoBehaviour
         LevelProgress.SetCompleted(CurrentLevelIndex);
         TotalScore += levelScore;
         SaveProgress();
-        StartCoroutine(ReturnToMapAfterDelay());
+        StartCoroutine(ReturnToMapAfterDelay(victoryToMapDelay));
     }
 
-    IEnumerator ReturnToMapAfterDelay()
+    IEnumerator ReturnToMapAfterDelay(float delay)
     {
-        yield return new WaitForSeconds(victoryToMapDelay);
+        yield return new WaitForSeconds(delay);
         SceneManager.LoadScene(mapSceneName);
     }
 
