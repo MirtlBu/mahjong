@@ -1,7 +1,9 @@
+using System.Collections;
 using UnityEngine;
 
 public class CameraOrbit : MonoBehaviour
 {
+    public static CameraOrbit Instance { get; private set; }
     [Header("Чувствительность")]
     public float sensitivity = 0.3f;
 
@@ -21,15 +23,36 @@ public class CameraOrbit : MonoBehaviour
 
     private Vector3 mouseDownPos;
     private bool    isDragging;
+    private Vector3 shakeOffset;
 
     // Другие скрипты могут спросить: сейчас drag или нет?
     public bool IsDragging => isDragging;
+
+    void Awake() => Instance = this;
 
     void Start()
     {
         pivot         = Vector3.zero;
         startRotation = transform.rotation;
         startPosition = transform.position;
+    }
+
+    public void Shake(float duration = 0.4f, float magnitude = 0.3f)
+    {
+        StartCoroutine(ShakeCoroutine(duration, magnitude));
+    }
+
+    IEnumerator ShakeCoroutine(float duration, float magnitude)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float strength = magnitude * (1f - elapsed / duration);
+            shakeOffset = Random.insideUnitSphere * strength;
+            yield return null;
+        }
+        shakeOffset = Vector3.zero;
     }
 
     void Update()
@@ -69,7 +92,7 @@ public class CameraOrbit : MonoBehaviour
         }
 
         Quaternion additionalRot = Quaternion.Euler(currentY, currentX, 0f);
-        transform.position = pivot + additionalRot * (startPosition - pivot);
+        transform.position = pivot + additionalRot * (startPosition - pivot) + shakeOffset;
         transform.rotation = additionalRot * startRotation;
     }
 }

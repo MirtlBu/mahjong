@@ -22,6 +22,7 @@ public class BoardManager : MonoBehaviour
     private List<TileView> allTiles = new List<TileView>();
     private TileView selectedTile;
     private TileView hintTileA, hintTileB;
+    private bool isAnimating;
     private int score;
 
     private Material[] atlasMaterials;
@@ -208,6 +209,13 @@ public class BoardManager : MonoBehaviour
 
     public void ShowHint()
     {
+        if (isAnimating) return;
+        if (selectedTile != null)
+        {
+            selectedTile.SetSelected(false);
+            selectedTile = null;
+        }
+
         var freeTiles = allTiles.FindAll(t => IsFree(t));
         for (int i = 0; i < freeTiles.Count; i++)
             for (int j = i + 1; j < freeTiles.Count; j++)
@@ -332,38 +340,99 @@ public class BoardManager : MonoBehaviour
 
     public void Shuffle()
     {
+        if (isAnimating) return;
         if (GameManager.Instance != null && !GameManager.Instance.UseShuffle())
         {
             Debug.Log("No shuffles remaining");
             return;
         }
+        StartCoroutine(ShuffleAnimation());
+    }
 
+    IEnumerator ShuffleAnimation()
+    {
+        isAnimating = true;
         if (selectedTile != null)
         {
             selectedTile.SetSelected(false);
             selectedTile = null;
         }
-
         GameHUD.Instance?.HideNoMoves();
 
-        var dataList = new List<TileData>();
-        foreach (var tile in allTiles)
-            dataList.Add(tile.data);
+        var tiles = new List<TileView>(allTiles);
+        var originalPositions = new List<Vector3>();
+        foreach (var t in tiles) originalPositions.Add(t.transform.position);
 
-        ShuffleTiles(dataList);
+        Vector3 center = Vector3.zero;
+        foreach (var p in originalPositions) center += p;
+        center /= originalPositions.Count;
+        float riseZ = originalPositions[0].z - 4f;
 
-        for (int i = 0; i < allTiles.Count; i++)
+        // Phase 1: anticipation — чуть вверх по Z и разлёт от центра
+        foreach (var tile in tiles)
         {
-            allTiles[i].SetData(dataList[i]);
+            Vector3 scatter = tile.transform.position - center;
+            scatter.z = 0f;
+            Vector3 target = tile.transform.position + scatter.normalized * 1.5f + new Vector3(0f, 0f, -2f);
+            tile.StartCoroutine(tile.AnimateTo(target, 0.3f));
+        }
+        yield return new WaitForSeconds(0.32f);
+
+        // Phase 2: летят к центру + вращение кластера на 360° по Z
+        Vector3 centerRisen = new Vector3(center.x, center.y, riseZ);
+        var phase2Start = new List<Vector3>();
+        foreach (var tile in tiles) phase2Start.Add(tile.transform.position);
+
+        float phase2Duration = 0.5f;
+        float phase2t = 0f;
+        bool shakeFired = false;
+        while (phase2t < 1f)
+        {
+            phase2t += Time.deltaTime / phase2Duration;
+            if (!shakeFired && phase2t >= 0.85f)
+            {
+                shakeFired = true;
+                CameraOrbit.Instance?.Shake(0.45f, 0.35f);
+            }
+            float smooth = Mathf.SmoothStep(0f, 1f, phase2t);
+            float angle = smooth * 360f * Mathf.Deg2Rad;
+            float cos = Mathf.Cos(angle), sin = Mathf.Sin(angle);
+
+            for (int i = 0; i < tiles.Count; i++)
+            {
+                Vector3 rel = Vector3.Lerp(phase2Start[i] - centerRisen, Vector3.zero, smooth);
+                Vector3 rotated = new Vector3(
+                    rel.x * cos - rel.y * sin,
+                    rel.x * sin + rel.y * cos,
+                    rel.z
+                );
+                tiles[i].transform.position = centerRisen + rotated;
+            }
+            yield return null;
+        }
+
+        // Collision: новые данные
+
+        var dataList = new List<TileData>();
+        foreach (var tile in tiles) dataList.Add(tile.data);
+        ShuffleTiles(dataList);
+        for (int i = 0; i < tiles.Count; i++)
+        {
+            tiles[i].SetData(dataList[i]);
             if (visualSettings != null)
             {
-                var rend = allTiles[i].GetComponentInChildren<Renderer>();
-                if (rend != null)
-                    ApplyTileVisuals(allTiles[i], rend, dataList[i]);
+                var rend = tiles[i].GetComponentInChildren<Renderer>();
+                if (rend != null) ApplyTileVisuals(tiles[i], rend, dataList[i]);
             }
         }
 
+        // Phase 3: разлетаемся обратно на свои места
+        for (int i = 0; i < tiles.Count; i++)
+            tiles[i].StartCoroutine(tiles[i].AnimateTo(originalPositions[i], 0.4f));
+        yield return new WaitForSeconds(0.42f);
+
         RefreshFreeStates();
+        isAnimating = false;
     }
 
     void ApplyTileVisuals(TileView view, Renderer rend, TileData data)

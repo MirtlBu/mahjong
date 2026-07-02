@@ -101,6 +101,19 @@ public class TileView : MonoBehaviour
             onHint.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
 
+    public IEnumerator AnimateTo(Vector3 target, float duration)
+    {
+        Vector3 start = transform.position;
+        float t = 0f;
+        while (t < 1f)
+        {
+            t += Time.deltaTime / duration;
+            transform.position = Vector3.Lerp(start, target, Mathf.SmoothStep(0f, 1f, t));
+            yield return null;
+        }
+        transform.position = target;
+    }
+
     public void PlayDeathEffect() => StartCoroutine(MatchAnimation(transform.position));
 
     public void PlayMatchAnimation(Vector3 meetPoint)
