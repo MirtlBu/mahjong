@@ -6,8 +6,9 @@ public class TileView : MonoBehaviour
     [HideInInspector] public TileData data;
     [HideInInspector] public int boardX, boardY, boardLayer;
 
-    [SerializeField] private ParticleSystem deathParticles;
-    [SerializeField] private ParticleSystem pulsationParticles;
+    [SerializeField] private ParticleSystem onMerge;
+    [SerializeField] private ParticleSystem onHint;
+    [SerializeField] private ParticleSystem onSelect;
 
     private Renderer tileRenderer;
     private MaterialPropertyBlock propBlock;
@@ -44,6 +45,11 @@ public class TileView : MonoBehaviour
         IsSelected = selected;
         transform.localScale = selected ? Vector3.one * 1.05f : Vector3.one;
         ApplyVisualState();
+        if (onSelect != null)
+        {
+            if (selected) onSelect.Play(true);
+            else onSelect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
     }
 
     public void SetFree(bool free)
@@ -85,14 +91,14 @@ public class TileView : MonoBehaviour
 
     public void Blink(int times = 2)
     {
-        if (pulsationParticles != null)
-            pulsationParticles.Play();
+        if (onHint != null)
+            onHint.Play();
     }
 
     public void StopBlink()
     {
-        if (pulsationParticles != null)
-            pulsationParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        if (onHint != null)
+            onHint.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
 
     public void PlayDeathEffect() => StartCoroutine(MatchAnimation(transform.position));
@@ -106,6 +112,9 @@ public class TileView : MonoBehaviour
 
     IEnumerator MatchAnimation(Vector3 meetPoint)
     {
+        if (onSelect != null)
+            onSelect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
         Vector3 startPos = transform.position;
         Vector3 risePos = startPos + new Vector3(0f, 0f, -5f);
 
@@ -128,8 +137,8 @@ public class TileView : MonoBehaviour
             yield return null;
         }
 
-        if (deathParticles != null)
-            deathParticles.Play();
+        if (onMerge != null)
+            onMerge.Play();
 
         // Phase 3: схлопываемся
         t = 0f;
@@ -142,8 +151,8 @@ public class TileView : MonoBehaviour
         }
 
         tileRenderer.enabled = false;
-        if (deathParticles != null)
-            yield return new WaitUntil(() => !deathParticles.IsAlive(true));
+        if (onMerge != null)
+            yield return new WaitUntil(() => !onMerge.IsAlive(true));
         Destroy(gameObject);
     }
 
