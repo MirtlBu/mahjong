@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class LevelMapUI : MonoBehaviour
@@ -10,7 +11,16 @@ public class LevelMapUI : MonoBehaviour
     [SerializeField] private GameObject dashPrefab;   // small dot/dash Image prefab
     [SerializeField] private int dashesPerSegment = 8;
 
+    [Header("Navigation")]
+    [SerializeField] private Button backButton;
+    [SerializeField] private string mainMenuSceneName = "MainMenu";
+
     private LevelNodeUI[] spawnedNodes;
+
+    void Start()
+    {
+        backButton?.onClick.AddListener(() => SceneManager.LoadScene(mainMenuSceneName));
+    }
 
     public void Build(LayoutSO[] levels)
     {
