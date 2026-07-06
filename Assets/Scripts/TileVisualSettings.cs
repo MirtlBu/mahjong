@@ -36,7 +36,7 @@ public class TileVisualSettings : ScriptableObject
         float tw = 1f / atlasColumns;
         float th = 1f / atlasRows;
 
-        float faceAspect = 1f; // images are already 2:3, matching tile face
+        float faceAspect = 3f / 2f; // face is 2 wide : 3 tall, invert for UV correction
         for (int i = 0; i < total; i++)
         {
             var mat = new Material(faceMaterial);
