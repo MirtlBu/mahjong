@@ -14,11 +14,7 @@ public class GameHUD : MonoBehaviour
     [Header("Score")]
     [SerializeField] private TMP_Text scoreLabel;
 
-    [Header("Resource Counts")]
-    [SerializeField] private TMP_Text hintCountLabel;
-    [SerializeField] private TMP_Text shuffleCountLabel;
-
-    [Header("No Moves")]
+[Header("No Moves")]
     [SerializeField] private TMP_Text noMovesLabel;
 
     [Header("Navigation")]
@@ -57,12 +53,7 @@ public class GameHUD : MonoBehaviour
         RefreshResourceCounts();
     }
 
-    public void RefreshResourceCounts()
-    {
-        var gm = GameManager.Instance;
-        if (hintCountLabel    != null) hintCountLabel.text    = gm != null ? $"{gm.HintCount}"    : "";
-        if (shuffleCountLabel != null) shuffleCountLabel.text = gm != null ? $"{gm.ShuffleCount}" : "";
-    }
+    public void RefreshResourceCounts() { }
 
     public void ShowNoMoves(bool isGameOver)
     {
@@ -93,8 +84,9 @@ public class GameHUD : MonoBehaviour
     {
         if (victoryPanel != null)
             victoryPanel.SetActive(false);
+        var gm = GameManager.Instance;
         if (scoreLabel != null)
-            scoreLabel.text = "0";
+            scoreLabel.text = gm != null ? gm.TotalScore.ToString() : "0";
     }
 
     public void HideVictory()

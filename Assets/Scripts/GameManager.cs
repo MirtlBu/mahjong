@@ -14,12 +14,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] private string gameSceneName = "GameScene";
 
     [Header("Starting Resources")]
-    [SerializeField] private int startingHints    = 5;
-    [SerializeField] private int startingShuffles = 1;
+    [SerializeField] private int startingScore = 300;
 
     [Header("Shop Prices")]
-    public int hintCost    = 100;
-    public int shuffleCost = 200;
+    public int hintCost    = 10;
+    public int shuffleCost = 25;
 
     [Header("Victory")]
     [SerializeField] private float victoryToMapDelay  = 3f;
@@ -27,15 +26,13 @@ public class GameManager : MonoBehaviour
 
     public int CurrentLevelIndex { get; private set; } = -1;
 
-    private int _sessionStartHints;
-    private int _sessionStartShuffles;
-    public LayoutSO[] Levels  => levels;
+    public LayoutSO[] Levels     => levels;
     public LayoutSO CurrentLevel => (CurrentLevelIndex >= 0 && CurrentLevelIndex < levels.Length)
         ? levels[CurrentLevelIndex] : null;
 
-    public int TotalScore   { get; private set; }
-    public int HintCount    { get; private set; }
-    public int ShuffleCount { get; private set; }
+    public int TotalScore { get; private set; }
+
+    private int _sessionStartScore;
 
     void Awake()
     {
@@ -53,6 +50,7 @@ public class GameManager : MonoBehaviour
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        GameHUD.Instance?.SetScore(TotalScore);
         GameHUD.Instance?.RefreshResourceCounts();
     }
 
@@ -60,17 +58,31 @@ public class GameManager : MonoBehaviour
 
     void LoadProgress()
     {
-        TotalScore   = PlayerPrefs.GetInt("total_score",    0);
-        HintCount    = PlayerPrefs.GetInt("hint_count",    startingHints);
-        ShuffleCount = PlayerPrefs.GetInt("shuffle_count", startingShuffles);
+        TotalScore = PlayerPrefs.GetInt("total_score", startingScore);
     }
 
     void SaveProgress()
     {
-        PlayerPrefs.SetInt("total_score",   TotalScore);
-        PlayerPrefs.SetInt("hint_count",    HintCount);
-        PlayerPrefs.SetInt("shuffle_count", ShuffleCount);
+        PlayerPrefs.SetInt("total_score", TotalScore);
         PlayerPrefs.Save();
+    }
+
+    // ── Score / currency ──────────────────────────────────────────
+
+    public void AddScore(int amount)
+    {
+        TotalScore += amount;
+        SaveProgress();
+        GameHUD.Instance?.SetScore(TotalScore);
+    }
+
+    public bool SpendScore(int amount)
+    {
+        if (TotalScore < amount) return false;
+        TotalScore -= amount;
+        SaveProgress();
+        GameHUD.Instance?.SetScore(TotalScore);
+        return true;
     }
 
     // ── Level flow ────────────────────────────────────────────────
@@ -79,15 +91,13 @@ public class GameManager : MonoBehaviour
     {
         if (index < 0 || index >= levels.Length) return;
         CurrentLevelIndex = index;
-        _sessionStartHints    = HintCount;
-        _sessionStartShuffles = ShuffleCount;
+        _sessionStartScore = TotalScore;
         SceneManager.LoadScene(gameSceneName);
     }
 
     public void AbandonLevel()
     {
-        HintCount    = _sessionStartHints;
-        ShuffleCount = _sessionStartShuffles;
+        TotalScore = _sessionStartScore;
         SaveProgress();
         SceneManager.LoadScene(mapSceneName);
     }
@@ -98,10 +108,9 @@ public class GameManager : MonoBehaviour
         StartCoroutine(ReturnToMapAfterDelay(gameOverToMapDelay));
     }
 
-    public void OnLevelComplete(int levelScore)
+    public void OnLevelComplete()
     {
         LevelProgress.SetCompleted(CurrentLevelIndex);
-        TotalScore += levelScore;
         SaveProgress();
         StartCoroutine(ReturnToMapAfterDelay(victoryToMapDelay));
     }
@@ -110,46 +119,6 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
         SceneManager.LoadScene(mapSceneName);
-    }
-
-    // ── Resource consumption ──────────────────────────────────────
-
-    public bool UseHint()
-    {
-        if (HintCount <= 0) return false;
-        HintCount--;
-        SaveProgress();
-        GameHUD.Instance?.RefreshResourceCounts();
-        return true;
-    }
-
-    public bool UseShuffle()
-    {
-        if (ShuffleCount <= 0) return false;
-        ShuffleCount--;
-        SaveProgress();
-        GameHUD.Instance?.RefreshResourceCounts();
-        return true;
-    }
-
-    // ── Shop ──────────────────────────────────────────────────────
-
-    public bool BuyHint()
-    {
-        if (TotalScore < hintCost) return false;
-        TotalScore -= hintCost;
-        HintCount++;
-        SaveProgress();
-        return true;
-    }
-
-    public bool BuyShuffle()
-    {
-        if (TotalScore < shuffleCost) return false;
-        TotalScore -= shuffleCost;
-        ShuffleCount++;
-        SaveProgress();
-        return true;
     }
 
 #if UNITY_EDITOR
@@ -162,6 +131,5 @@ public class GameManager : MonoBehaviour
         LoadProgress();
         Debug.Log("All progress reset");
     }
-
 #endif
 }

@@ -23,7 +23,6 @@ public class BoardManager : MonoBehaviour
     private TileView selectedTile;
     private TileView hintTileA, hintTileB;
     private bool isAnimating;
-    private int score;
 
     private Material[] atlasMaterials;
 
@@ -43,11 +42,12 @@ public class BoardManager : MonoBehaviour
     [ContextMenu("Debug: Trigger Win")]
     public void DebugTriggerWin()
     {
-        int baseScore = score;
-        score += winBonus;
-        GameHUD.Instance?.SetScore(score);
-        GameHUD.Instance?.ShowVictory(baseScore, score);
-        GameManager.Instance?.OnLevelComplete(score);
+        var gm = GameManager.Instance;
+        int before = gm != null ? gm.TotalScore : 0;
+        gm?.AddScore(winBonus);
+        int after = gm != null ? gm.TotalScore : before + winBonus;
+        GameHUD.Instance?.ShowVictory(before, after);
+        gm?.OnLevelComplete();
     }
 
     IEnumerator SolveCoroutine()
@@ -68,8 +68,7 @@ public class BoardManager : MonoBehaviour
             Vector3 meet = (tileA.transform.position + tileB.transform.position) * 0.5f;
             tileA.PlayMatchAnimation(meet);
             tileB.PlayMatchAnimation(meet);
-            score += pointsPerMatch;
-            GameHUD.Instance?.SetScore(score);
+            GameManager.Instance?.AddScore(pointsPerMatch);
             RefreshFreeStates();
 
             yield return new WaitForSeconds(1f);
@@ -99,7 +98,6 @@ public class BoardManager : MonoBehaviour
             if (tile != null) Destroy(tile.gameObject);
 
         allTiles.Clear();
-        score = 0;
 
         BuildBoard();
     }
@@ -194,8 +192,7 @@ public class BoardManager : MonoBehaviour
             tile.PlayMatchAnimation(meetPoint);
             selectedTile = null;
 
-            score += pointsPerMatch;
-            GameHUD.Instance?.SetScore(score);
+            GameManager.Instance?.AddScore(pointsPerMatch);
 
             RefreshFreeStates();
             CheckWinLose();
@@ -221,9 +218,9 @@ public class BoardManager : MonoBehaviour
             for (int j = i + 1; j < freeTiles.Count; j++)
                 if (freeTiles[i].data.Matches(freeTiles[j].data))
                 {
-                    if (GameManager.Instance != null && !GameManager.Instance.UseHint())
+                    if (GameManager.Instance != null && !GameManager.Instance.SpendScore(GameManager.Instance.hintCost))
                     {
-                        Debug.Log("No hints remaining");
+                        Debug.Log("Not enough score for hint");
                         return;
                     }
                     hintTileA = freeTiles[i];
@@ -274,12 +271,13 @@ public class BoardManager : MonoBehaviour
     {
         if (allTiles.Count == 0)
         {
-            int baseScore = score;
-            score += winBonus;
-            GameHUD.Instance?.SetScore(score);
-            GameHUD.Instance?.ShowVictory(baseScore, score);
-            GameManager.Instance?.OnLevelComplete(score);
-            Debug.Log($"You win! Final score: {score}");
+            var gm2 = GameManager.Instance;
+            int before = gm2 != null ? gm2.TotalScore : 0;
+            gm2?.AddScore(winBonus);
+            int after = gm2 != null ? gm2.TotalScore : before + winBonus;
+            GameHUD.Instance?.ShowVictory(before, after);
+            gm2?.OnLevelComplete();
+            Debug.Log($"You win! Final score: {after}");
             return;
         }
 
@@ -291,9 +289,9 @@ public class BoardManager : MonoBehaviour
 
         Debug.Log("CheckWinLose: no valid pairs found");
         var gm = GameManager.Instance;
-        bool hasShuffles = gm == null || gm.ShuffleCount > 0;
+        bool canAffordShuffle = gm == null || gm.TotalScore >= gm.shuffleCost;
         bool shuffleUseless = IsShuffleUseless();
-        bool gameOver = !hasShuffles || shuffleUseless;
+        bool gameOver = !canAffordShuffle || shuffleUseless;
         GameHUD.Instance?.ShowNoMoves(gameOver);
         if (gameOver)
             gm?.OnGameOver();
@@ -341,9 +339,9 @@ public class BoardManager : MonoBehaviour
     public void Shuffle()
     {
         if (isAnimating) return;
-        if (GameManager.Instance != null && !GameManager.Instance.UseShuffle())
+        if (GameManager.Instance != null && !GameManager.Instance.SpendScore(GameManager.Instance.shuffleCost))
         {
-            Debug.Log("No shuffles remaining");
+            Debug.Log("Not enough score for shuffle");
             return;
         }
         StartCoroutine(ShuffleAnimation());
