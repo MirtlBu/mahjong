@@ -22,7 +22,7 @@ public class GameHUD : MonoBehaviour
 
     [Header("Victory")]
     [SerializeField] private GameObject victoryPanel;
-    [SerializeField] private TMP_Text victoryScoreLabel;
+    [SerializeField] private TMP_Text victoryStarsLabel;
     [SerializeField] private ParticleSystem[] confettiSystems;
 
     void Awake()
@@ -95,7 +95,7 @@ public class GameHUD : MonoBehaviour
             victoryPanel.SetActive(false);
     }
 
-    public void ShowVictory(int fromScore, int toScore)
+    public void ShowVictory(int fromScore, int toScore, int stars)
     {
         if (victoryPanel != null)
         {
@@ -106,25 +106,17 @@ public class GameHUD : MonoBehaviour
         if (noMovesLabel != null)
             noMovesLabel.gameObject.SetActive(false);
 
+        if (victoryStarsLabel != null)
+            victoryStarsLabel.text = StarsToString(stars);
+
         foreach (var ps in confettiSystems)
             if (ps != null) ps.Play();
-
-        StartCoroutine(AnimateScore(fromScore, toScore, 1.5f));
     }
 
-    IEnumerator AnimateScore(int from, int to, float duration)
+    static string StarsToString(int stars) => stars switch
     {
-        float elapsed = 0f;
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            float t = Mathf.SmoothStep(0f, 1f, elapsed / duration);
-            int current = Mathf.RoundToInt(Mathf.Lerp(from, to, t));
-            if (victoryScoreLabel != null)
-                victoryScoreLabel.text = string.Format(GameStrings.ScoreFormat, current);
-            yield return null;
-        }
-        if (victoryScoreLabel != null)
-            victoryScoreLabel.text = string.Format(GameStrings.ScoreFormat, to);
-    }
+        3 => "\u2605\u2605\u2605",
+        2 => "\u2605\u2605\u2606",
+        _ => "\u2605\u2606\u2606",
+    };
 }

@@ -108,11 +108,25 @@ public class GameManager : MonoBehaviour
         StartCoroutine(ReturnToMapAfterDelay(gameOverToMapDelay));
     }
 
-    public void OnLevelComplete()
+    // Returns stars earned (1-3)
+    public int OnLevelComplete(int maxPossibleScore)
     {
+        int scoreEarned = TotalScore - _sessionStartScore;
+        int stars = CalculateStars(scoreEarned, maxPossibleScore);
         LevelProgress.SetCompleted(CurrentLevelIndex);
+        LevelProgress.SetStars(CurrentLevelIndex, stars);
         SaveProgress();
         StartCoroutine(ReturnToMapAfterDelay(victoryToMapDelay));
+        return stars;
+    }
+
+    static int CalculateStars(int scoreEarned, int maxPossibleScore)
+    {
+        if (maxPossibleScore <= 0) return 1;
+        float ratio = (float)scoreEarned / maxPossibleScore;
+        if (ratio >= 0.8f) return 3;
+        if (ratio >= 0.5f) return 2;
+        return 1;
     }
 
     IEnumerator ReturnToMapAfterDelay(float delay)

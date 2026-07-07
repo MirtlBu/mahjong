@@ -10,13 +10,15 @@ public class ButtonView : MonoBehaviour
     [SerializeField] private Color hoverColor   = new Color(0.85f, 1f, 0.85f, 1f);
     [SerializeField] private Color pressedColor = new Color(0.6f, 0.9f, 0.6f, 1f);
 
+    [SerializeField] private Renderer targetRenderer;
+
     private Renderer btnRenderer;
     private MaterialPropertyBlock propBlock;
     private Vector3 originalScale;
 
     void Awake()
     {
-        btnRenderer   = GetComponentInChildren<Renderer>();
+        btnRenderer   = targetRenderer != null ? targetRenderer : GetComponentInChildren<Renderer>();
         propBlock     = new MaterialPropertyBlock();
         originalScale = transform.localScale;
         ApplyColor(normalColor);

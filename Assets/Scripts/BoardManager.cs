@@ -23,6 +23,7 @@ public class BoardManager : MonoBehaviour
     private TileView selectedTile;
     private TileView hintTileA, hintTileB;
     private bool isAnimating;
+    private int _totalTileCount;
 
     private Material[] atlasMaterials;
 
@@ -46,8 +47,9 @@ public class BoardManager : MonoBehaviour
         int before = gm != null ? gm.TotalScore : 0;
         gm?.AddScore(winBonus);
         int after = gm != null ? gm.TotalScore : before + winBonus;
-        GameHUD.Instance?.ShowVictory(before, after);
-        gm?.OnLevelComplete();
+        int maxPossible = (_totalTileCount / 2) * pointsPerMatch + winBonus;
+        int stars = gm != null ? gm.OnLevelComplete(maxPossible) : 1;
+        GameHUD.Instance?.ShowVictory(before, after, stars);
     }
 
     IEnumerator SolveCoroutine()
@@ -120,6 +122,7 @@ public class BoardManager : MonoBehaviour
         }
 
         RefreshFreeStates();
+        _totalTileCount = allTiles.Count;
     }
 
     void SpawnTile(TileData data, int x, int y, int layer)
@@ -275,9 +278,10 @@ public class BoardManager : MonoBehaviour
             int before = gm2 != null ? gm2.TotalScore : 0;
             gm2?.AddScore(winBonus);
             int after = gm2 != null ? gm2.TotalScore : before + winBonus;
-            GameHUD.Instance?.ShowVictory(before, after);
-            gm2?.OnLevelComplete();
-            Debug.Log($"You win! Final score: {after}");
+            int maxPossible = (_totalTileCount / 2) * pointsPerMatch + winBonus;
+            int stars = gm2 != null ? gm2.OnLevelComplete(maxPossible) : 1;
+            GameHUD.Instance?.ShowVictory(before, after, stars);
+            Debug.Log($"You win! Final score: {after}, Stars: {stars}");
             return;
         }
 
@@ -431,6 +435,7 @@ public class BoardManager : MonoBehaviour
 
         RefreshFreeStates();
         isAnimating = false;
+        CheckWinLose();
     }
 
     void ApplyTileVisuals(TileView view, Renderer rend, TileData data)
