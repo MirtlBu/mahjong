@@ -9,7 +9,7 @@ public class LevelNodeUI : MonoBehaviour
     [SerializeField] private Image previewImage;
     [SerializeField] private GameObject lockOverlay;
     [SerializeField] private Button button;
-    [SerializeField] private TMP_Text starsLabel;
+    [SerializeField] private StarsDisplay starsDisplay;
 
     private LayoutSO config;
 
@@ -36,10 +36,11 @@ public class LevelNodeUI : MonoBehaviour
         if (lockOverlay != null) lockOverlay.SetActive(!unlocked);
         if (button != null) button.interactable = unlocked;
 
-        if (starsLabel != null)
+        if (starsDisplay != null)
         {
             int stars = LevelProgress.GetStars(levelIndex);
-            starsLabel.text = stars > 0 ? new string('\u2605', stars) + new string('\u2606', 3 - stars) : "";
+            if (stars > 0) starsDisplay.Show(stars);
+            else starsDisplay.Hide();
         }
     }
 }

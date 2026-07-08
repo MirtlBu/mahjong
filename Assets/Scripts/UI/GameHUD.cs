@@ -22,7 +22,7 @@ public class GameHUD : MonoBehaviour
 
     [Header("Victory")]
     [SerializeField] private GameObject victoryPanel;
-    [SerializeField] private TMP_Text victoryStarsLabel;
+    [SerializeField] private StarsDisplay victoryStars;
     [SerializeField] private ParticleSystem[] confettiSystems;
 
     void Awake()
@@ -106,17 +106,9 @@ public class GameHUD : MonoBehaviour
         if (noMovesLabel != null)
             noMovesLabel.gameObject.SetActive(false);
 
-        if (victoryStarsLabel != null)
-            victoryStarsLabel.text = StarsToString(stars);
+        victoryStars?.Show(stars);
 
         foreach (var ps in confettiSystems)
             if (ps != null) ps.Play();
     }
-
-    static string StarsToString(int stars) => stars switch
-    {
-        3 => "\u2605\u2605\u2605",
-        2 => "\u2605\u2605\u2606",
-        _ => "\u2605\u2606\u2606",
-    };
 }

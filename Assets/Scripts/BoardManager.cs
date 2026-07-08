@@ -270,18 +270,14 @@ public class BoardManager : MonoBehaviour
             tile.SetFree(IsFree(tile));
     }
 
+    [Header("Victory Delay")]
+    public float victoryDelay = 1.2f;
+
     void CheckWinLose()
     {
         if (allTiles.Count == 0)
         {
-            var gm2 = GameManager.Instance;
-            int before = gm2 != null ? gm2.TotalScore : 0;
-            gm2?.AddScore(winBonus);
-            int after = gm2 != null ? gm2.TotalScore : before + winBonus;
-            int maxPossible = (_totalTileCount / 2) * pointsPerMatch + winBonus;
-            int stars = gm2 != null ? gm2.OnLevelComplete(maxPossible) : 1;
-            GameHUD.Instance?.ShowVictory(before, after, stars);
-            Debug.Log($"You win! Final score: {after}, Stars: {stars}");
+            StartCoroutine(ShowVictoryDelayed());
             return;
         }
 
@@ -299,6 +295,19 @@ public class BoardManager : MonoBehaviour
         GameHUD.Instance?.ShowNoMoves(gameOver);
         if (gameOver)
             gm?.OnGameOver();
+    }
+
+    IEnumerator ShowVictoryDelayed()
+    {
+        yield return new WaitForSeconds(victoryDelay);
+        var gm2 = GameManager.Instance;
+        int before = gm2 != null ? gm2.TotalScore : 0;
+        gm2?.AddScore(winBonus);
+        int after = gm2 != null ? gm2.TotalScore : before + winBonus;
+        int maxPossible = (_totalTileCount / 2) * pointsPerMatch + winBonus;
+        int stars = gm2 != null ? gm2.OnLevelComplete(maxPossible) : 1;
+        GameHUD.Instance?.ShowVictory(before, after, stars);
+        Debug.Log($"You win! Stars: {stars} | score: {before} → {after}");
     }
 
     bool IsShuffleUseless()

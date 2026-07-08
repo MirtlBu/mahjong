@@ -1327,10 +1327,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ba9e1aa4ffdbf463fa81949e13e7cd96, type: 2}
   mapSceneName: MapScene
   gameSceneName: GameScene
-  startingScore: 1000
+  startingScore: 10000
   hintCost: 100
   shuffleCost: 200
-  victoryToMapDelay: 3
+  victoryToMapDelay: 5
   gameOverToMapDelay: 5
 --- !u!4 &2056242001
 Transform:

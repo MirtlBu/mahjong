@@ -113,6 +113,8 @@ public class GameManager : MonoBehaviour
     {
         int scoreEarned = TotalScore - _sessionStartScore;
         int stars = CalculateStars(scoreEarned, maxPossibleScore);
+        float ratio = maxPossibleScore > 0 ? (float)scoreEarned / maxPossibleScore : 0f;
+        Debug.Log($"[Stars] earned={scoreEarned} max={maxPossibleScore} ratio={ratio:P0} → {stars} stars");
         LevelProgress.SetCompleted(CurrentLevelIndex);
         LevelProgress.SetStars(CurrentLevelIndex, stars);
         SaveProgress();
@@ -124,8 +126,8 @@ public class GameManager : MonoBehaviour
     {
         if (maxPossibleScore <= 0) return 1;
         float ratio = (float)scoreEarned / maxPossibleScore;
-        if (ratio >= 0.8f) return 3;
-        if (ratio >= 0.5f) return 2;
+        if (ratio >= 0.95f) return 3;
+        if (ratio >= 0.75f) return 2;
         return 1;
     }
 
