@@ -57,12 +57,16 @@ Material:
     m_Floats:
     - _QueueControl: 0
     - _QueueOffset: 0
+    - _wave_freq: 0.4
     - _wiggle_offset: 0.8
     - _wind_speed: 2
     - _wind_strentg: 0.7
     m_Colors:
-    - _Color1: {r: 0.13821644, g: 0.4528302, b: 0.07903168, a: 1}
-    - _Color2: {r: 0.65323895, g: 0.8867924, b: 0.12967247, a: 1}
+    - _Color1: {r: 0.13817197, g: 0.45095834, b: 0.6509434, a: 1}
+    - _Color2: {r: 1, g: 0.9451673, b: 0, a: 1}
+    - _color_bottom: {r: 0.6094795, g: 0.7075472, b: 0.36378607, a: 1}
+    - _color_far: {r: 0.12415449, g: 0.8490566, b: 0.783614, a: 1}
+    - _color_top: {r: 0.10792904, g: 0.4811321, b: 0.093049124, a: 1}
     - _wind_direction_new: {r: 1, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

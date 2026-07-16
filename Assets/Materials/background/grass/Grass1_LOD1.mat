@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Grass1_LOD1
-  m_Shader: {fileID: -6465566751694194690, guid: cb307bc7ab2824ad1ab0dfaa57176afd, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 93da30301e779434a9e40e17cb8b5616, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -44,16 +44,15 @@ Material:
     m_Floats:
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _wiggle_offset: 0.3
-    - _wind_speed: 0.6
-    - _wind_strentg: 0.7
+    - _wave_freq: 0.1
+    - _wind_speed: 0.2
     m_Colors:
-    - _Color1: {r: 0.10475805, g: 0.4509804, b: 0.07843138, a: 1}
-    - _Color2: {r: 0.5406727, g: 0.8862745, b: 0.12941174, a: 1}
-    - _wind_direction_new: {r: 1, g: 0, b: 0, a: 0}
+    - _color_bottom: {r: 0.1254902, g: 0.7529412, b: 0.29411766, a: 1}
+    - _color_far: {r: 0.15045391, g: 0.6509434, b: 0.37277564, a: 1}
+    - _color_top: {r: 0.19851138, g: 0.4339623, b: 0.0020469967, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!114 &1690650604708475470
+--- !u!114 &4850157777546686440
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}

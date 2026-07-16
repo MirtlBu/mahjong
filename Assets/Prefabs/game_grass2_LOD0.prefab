@@ -51,7 +51,7 @@ PrefabInstance:
     - target: {fileID: -7511558181221131132, guid: e2a9c97ed266c47d681d3f3efd57673b, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: c648da426ef92452e8a7fe4aa56b03e4, type: 2}
+      objectReference: {fileID: 2100000, guid: be9f4e5961b454a368f8dab122930b00, type: 2}
     - target: {fileID: 919132149155446097, guid: e2a9c97ed266c47d681d3f3efd57673b, type: 3}
       propertyPath: m_Name
       value: game_grass2_LOD0
