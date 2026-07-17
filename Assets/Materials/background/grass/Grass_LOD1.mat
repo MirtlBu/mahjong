@@ -48,7 +48,7 @@ Material:
     - _wind_speed: 0.2
     m_Colors:
     - _color_bottom: {r: 0.049629778, g: 0.4509804, b: 0.41568628, a: 1}
-    - _color_far: {r: 0.36652964, g: 0.745283, b: 0.1511659, a: 1}
+    - _color_far: {r: 0.3665296, g: 0.745283, b: 0.15116587, a: 0.5882353}
     - _color_top: {r: 0.24075657, g: 0.9528302, b: 0.12135102, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

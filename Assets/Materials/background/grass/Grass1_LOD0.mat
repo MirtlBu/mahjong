@@ -57,9 +57,9 @@ Material:
     m_Floats:
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _wave_freq: 0.4
+    - _wave_freq: 0.1
     - _wiggle_offset: 0.8
-    - _wind_speed: 2
+    - _wind_speed: 1
     - _wind_strentg: 0.7
     m_Colors:
     - _Color1: {r: 0.13817197, g: 0.45095834, b: 0.6509434, a: 1}
