@@ -30,18 +30,15 @@ public class MainMenuController : MonoBehaviour
         creditsCloseButton.onClick.AddListener(OnCreditsClose);
         exitButton.onClick.AddListener(OnExit);
 
-        Debug.Log("MainMenu: Start() завершён, слушатели назначены");
     }
 
     void OnPlay()
     {
-        Debug.Log("MainMenu: Play нажата");
         SceneManager.LoadScene(mapSceneName);
     }
 
     void OnCreditsOpen()
     {
-        Debug.Log("MainMenu: Credits нажата");
         creditsPanel.SetActive(true);
     }
 

@@ -10,9 +10,8 @@ public class GameHUD : MonoBehaviour
     [Serializable]
     public class PowerUpButton
     {
-        public string id;            // "hint", "shuffle", "bomb", etc.
+        public string id;       // "hint", "shuffle", "bomb", etc.
         public Button button;
-        public int unlockAtLevel;    // 0 = доступно с первого уровня
     }
 
     [Header("Power-Ups")]
@@ -32,16 +31,24 @@ public class GameHUD : MonoBehaviour
 
     [Header("Defeat")]
     [SerializeField] private GameObject loosePanel;
-    [SerializeField] private TMP_Text noMovesLabel;
     [SerializeField] private Button looseOkButton;
+    [SerializeField] private TMP_Text shuffleHintLabel;    // маленькая надпись внизу доски (вне попапа)
+
+    [Header("Message Popup")]
+    [SerializeField] private GameObject messagePanel;
+    [SerializeField] private TMP_Text messageHeader;
+    [SerializeField] private UnityEngine.UI.Image messageImage;
+    [SerializeField] private Button messageOkButton;
 
     void Awake()
     {
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
 
-        if (victoryPanel != null) victoryPanel.SetActive(false);
-        if (loosePanel != null)   loosePanel.SetActive(false);
+        if (victoryPanel != null)    victoryPanel.SetActive(false);
+        if (loosePanel != null)      loosePanel.SetActive(false);
+        if (messagePanel != null)    messagePanel.SetActive(false);
+        if (shuffleHintLabel != null) shuffleHintLabel.gameObject.SetActive(false);
     }
 
     void Start()
@@ -55,6 +62,7 @@ public class GameHUD : MonoBehaviour
         backButton?.onClick.AddListener(() => GameManager.Instance?.AbandonLevel());
         okButton?.onClick.AddListener(OnOkClicked);
         looseOkButton?.onClick.AddListener(OnOkClicked);
+        messageOkButton?.onClick.AddListener(OnMessageOkClicked);
 
         RefreshPowerUps();
         RefreshResourceCounts();
@@ -71,29 +79,53 @@ public class GameHUD : MonoBehaviour
     }
 
     [Header("Debug")]
-    [SerializeField] private bool showAllPowerUps = true; // TODO: убрать после настройки
+    [SerializeField] private bool showAllPowerUps = false;
 
     public void RefreshPowerUps()
     {
-        int levelIndex = GameManager.Instance != null ? GameManager.Instance.CurrentLevelIndex : 0;
-        foreach (var p in powerUpButtons)
-            if (p.button != null)
-                p.button.gameObject.SetActive(showAllPowerUps || levelIndex >= p.unlockAtLevel);
+        if (showAllPowerUps)
+            foreach (var p in powerUpButtons)
+                if (p.button != null) p.button.gameObject.SetActive(true);
     }
 
-    public void RefreshResourceCounts() { }
+    public void RefreshResourceCounts()
+    {
+        var gm = GameManager.Instance;
+        if (gm == null) return;
+        foreach (var p in powerUpButtons)
+        {
+            if (p.button == null) continue;
+            bool unlocked = p.id switch
+            {
+                "hint"    => gm.HintCount    > 0,
+                "shuffle" => gm.ShuffleCount > 0,
+                "bomb"    => gm.BombCount    > 0,
+                _         => false
+            };
+            p.button.gameObject.SetActive(unlocked);
+        }
+    }
 
     public void ShowNoMoves(bool isGameOver)
     {
-        if (noMovesLabel != null)
-            noMovesLabel.text = isGameOver ? GameStrings.GameOver : GameStrings.NoMovesUseShuffle;
-        if (loosePanel != null)
-            loosePanel.SetActive(true);
+        if (isGameOver)
+        {
+            if (loosePanel != null) loosePanel.SetActive(true);
+        }
+        else
+        {
+            if (shuffleHintLabel != null)
+            {
+                shuffleHintLabel.text = GameStrings.NoMovesUseShuffle;
+                shuffleHintLabel.gameObject.SetActive(true);
+            }
+        }
     }
 
     public void HideNoMoves()
     {
-        if (loosePanel != null) loosePanel.SetActive(false);
+        if (loosePanel != null)       loosePanel.SetActive(false);
+        if (shuffleHintLabel != null) shuffleHintLabel.gameObject.SetActive(false);
     }
 
     public void SetScore(int score)
@@ -122,10 +154,29 @@ public class GameHUD : MonoBehaviour
         GameManager.Instance?.ReturnToMap();
     }
 
+    private System.Action _messageOnClose;
+
+    void OnMessageOkClicked()
+    {
+        if (messagePanel != null) messagePanel.SetActive(false);
+        RefreshResourceCounts();
+        var cb = _messageOnClose;
+        _messageOnClose = null;
+        cb?.Invoke();
+    }
+
+    public void ShowMessage(SpecialTileRewardSO reward, System.Action onClose = null)
+    {
+        if (messagePanel == null) return;
+        if (messageHeader != null) messageHeader.text = reward.messageText;
+        if (messageImage  != null) messageImage.sprite = reward.icon;
+        _messageOnClose = onClose;
+        messagePanel.SetActive(true);
+    }
+
     public void ShowVictory(int fromScore, int toScore, int stars)
     {
         int gained = toScore - fromScore;
-        Debug.Log($"[PlusScore] from={fromScore} to={toScore} gained={gained} instance={PlusScoreLabel.Instance}");
         if (victoryPanel != null)
         {
             victoryPanel.SetActive(true);

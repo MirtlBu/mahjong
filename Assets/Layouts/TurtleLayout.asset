@@ -16,3 +16,5 @@ MonoBehaviour:
   previewSprite: {fileID: 21300000, guid: 0ccac45a27ccd44e1bb6b5070bd374d0, type: 3}
   mapPosition: {x: -750, y: 150}
   maxTileTypes: 12
+  specialTileRewards:
+  - {fileID: 11400000, guid: f963278a41e6c46928d1ba42365786fe, type: 2}

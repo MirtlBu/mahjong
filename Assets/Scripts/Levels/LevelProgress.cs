@@ -27,6 +27,15 @@ public static class LevelProgress
         }
     }
 
+    public static bool AreRewardsClaimed(int index) =>
+        PlayerPrefs.GetInt($"level_{index}_rewards_claimed", 0) == 1;
+
+    public static void SetRewardsClaimed(int index)
+    {
+        PlayerPrefs.SetInt($"level_{index}_rewards_claimed", 1);
+        PlayerPrefs.Save();
+    }
+
     public static void ResetAll()
     {
         PlayerPrefs.DeleteAll();

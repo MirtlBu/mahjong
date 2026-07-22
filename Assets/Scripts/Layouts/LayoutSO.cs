@@ -12,5 +12,9 @@ public abstract class LayoutSO : ScriptableObject
     [Tooltip("Сколько уникальных типов тайлов использовать. 0 = все (34). Меньше = легче найти пары.")]
     public int maxTileTypes = 0;
 
+    [Header("Special Tiles")]
+    [Tooltip("Каждый элемент добавляет пару специальных тайлов на доску. При матче выдаётся награда.")]
+    public SpecialTileRewardSO[] specialTileRewards;
+
     public abstract List<Vector3Int> GetPositions();
 }

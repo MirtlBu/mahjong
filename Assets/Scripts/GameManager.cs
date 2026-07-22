@@ -19,6 +19,11 @@ public class GameManager : MonoBehaviour
     public int hintCost    = 10;
     public int shuffleCost = 25;
 
+    [Header("Power-Up Inventory")]
+    public int HintCount    { get; private set; }
+    public int ShuffleCount { get; private set; }
+    public int BombCount    { get; private set; }
+
 
     public int CurrentLevelIndex { get; private set; } = -1;
 
@@ -108,12 +113,26 @@ public class GameManager : MonoBehaviour
     {
         int scoreEarned = TotalScore - _sessionStartScore;
         int stars = CalculateStars(scoreEarned, maxPossibleScore);
-        float ratio = maxPossibleScore > 0 ? (float)scoreEarned / maxPossibleScore : 0f;
-        Debug.Log($"[Stars] earned={scoreEarned} max={maxPossibleScore} ratio={ratio:P0} → {stars} stars");
         LevelProgress.SetCompleted(CurrentLevelIndex);
         LevelProgress.SetStars(CurrentLevelIndex, stars);
         SaveProgress();
         return stars;
+    }
+
+    public void GrantPowerUp(SpecialTileRewardSO reward)
+    {
+        switch (reward.powerUpType)
+        {
+            case PowerUpType.Hint:    HintCount++;    break;
+            case PowerUpType.Shuffle: ShuffleCount++; break;
+            case PowerUpType.Bomb:    BombCount++;    break;
+            case PowerUpType.Random:
+                int r = UnityEngine.Random.Range(0, 3);
+                if (r == 0) HintCount++;
+                else if (r == 1) ShuffleCount++;
+                else BombCount++;
+                break;
+        }
     }
 
     public void ReturnToMap()
@@ -140,7 +159,6 @@ public class GameManager : MonoBehaviour
         PlayerPrefs.DeleteAll();
         PlayerPrefs.Save();
         LoadProgress();
-        Debug.Log("All progress reset");
     }
 #endif
 }

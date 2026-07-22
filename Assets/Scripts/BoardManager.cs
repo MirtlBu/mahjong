@@ -26,6 +26,7 @@ public class BoardManager : MonoBehaviour
     private int _totalTileCount;
 
     private Material[] atlasMaterials;
+    public Material[] GetAtlasMaterials() => atlasMaterials;
 
     void Awake()
     {
@@ -112,10 +113,25 @@ public class BoardManager : MonoBehaviour
             : TurtleLayout.GetPositions();
 
         int maxTypes = levelLayout != null ? levelLayout.maxTileTypes : 0;
-        List<TileData> tileSet = GenerateTileSet(layout.Count, maxTypes);
+
+        int levelIndex = GameManager.Instance?.CurrentLevelIndex ?? -1;
+        bool rewardsClaimed = levelIndex >= 0 && LevelProgress.AreRewardsClaimed(levelIndex);
+        var rewards = (!rewardsClaimed) ? levelLayout?.specialTileRewards : null;
+        int specialPairCount = rewards != null ? rewards.Length : 0;
+        int regularCount = layout.Count - specialPairCount * 2;
+
+        List<TileData> tileSet = GenerateTileSet(regularCount, maxTypes);
+
+        if (rewards != null)
+            foreach (var r in rewards)
+            {
+                tileSet.Add(new TileData(TileSuit.Dragons, 0) { reward = r });
+                tileSet.Add(new TileData(TileSuit.Dragons, 0) { reward = r });
+            }
+
         ShuffleTiles(tileSet);
 
-        int count = tileSet.Count; // may be layout.Count-1 if layout has odd number of positions
+        int count = tileSet.Count;
         for (int i = 0; i < count; i++)
         {
             Vector3Int pos = layout[i];
@@ -167,7 +183,6 @@ public class BoardManager : MonoBehaviour
         StopHintBlink();
         if (!IsFree(tile))
         {
-            Debug.Log($"Tile {tile.data?.suit} {tile.data?.value} is NOT free");
             return;
         }
 
@@ -175,7 +190,6 @@ public class BoardManager : MonoBehaviour
         {
             selectedTile = tile;
             tile.SetSelected(true);
-            Debug.Log($"Selected: {tile.data?.suit} {tile.data?.value}");
             return;
         }
 
@@ -186,9 +200,10 @@ public class BoardManager : MonoBehaviour
             return;
         }
 
-        Debug.Log($"Comparing: {selectedTile.data?.suit} {selectedTile.data?.value}  vs  {tile.data?.suit} {tile.data?.value}");
         if (selectedTile.data.Matches(tile.data))
         {
+            SpecialTileRewardSO reward = selectedTile.data.reward ?? tile.data.reward;
+
             allTiles.Remove(selectedTile);
             allTiles.Remove(tile);
             Vector3 meetPoint = (selectedTile.transform.position + tile.transform.position) * 0.5f;
@@ -197,9 +212,20 @@ public class BoardManager : MonoBehaviour
             selectedTile = null;
 
             GameManager.Instance?.AddScore(pointsPerMatch);
-
             RefreshFreeStates();
-            CheckWinLose();
+
+            if (reward != null)
+            {
+                GameManager.Instance?.GrantPowerUp(reward);
+                int li = GameManager.Instance?.CurrentLevelIndex ?? -1;
+                if (li >= 0) LevelProgress.SetRewardsClaimed(li);
+                bool boardEmpty = allTiles.Count == 0;
+                StartCoroutine(ShowRewardDelayed(reward, boardEmpty));
+            }
+            else
+            {
+                StartCoroutine(WaitForMatchThenCheckWinLose());
+            }
         }
         else
         {
@@ -224,7 +250,6 @@ public class BoardManager : MonoBehaviour
                 {
                     if (GameManager.Instance != null && !GameManager.Instance.SpendScore(GameManager.Instance.hintCost))
                     {
-                        Debug.Log("Not enough score for hint");
                         return;
                     }
                     hintTileA = freeTiles[i];
@@ -271,8 +296,6 @@ public class BoardManager : MonoBehaviour
             tile.SetFree(IsFree(tile));
     }
 
-    [Header("Victory Delay")]
-    public float victoryDelay = 1f;
 
     void CheckWinLose()
     {
@@ -288,19 +311,38 @@ public class BoardManager : MonoBehaviour
                 if (freeTiles[i].data.Matches(freeTiles[j].data))
                     return;
 
-        Debug.Log("CheckWinLose: no valid pairs found");
         var gm = GameManager.Instance;
-        bool canAffordShuffle = gm == null || gm.TotalScore >= gm.shuffleCost;
+        bool hasShufflePowerUp = gm != null && gm.ShuffleCount > 0;
+        bool canAffordShuffle = gm != null && gm.TotalScore >= gm.shuffleCost;
         bool shuffleUseless = IsShuffleUseless();
-        bool gameOver = !canAffordShuffle || shuffleUseless;
+        bool gameOver = !hasShufflePowerUp || !canAffordShuffle || shuffleUseless;
         GameHUD.Instance?.ShowNoMoves(gameOver);
         if (gameOver)
             gm?.OnGameOver();
     }
 
+    [Header("Popup Delay")]
+    [Tooltip("Phase1(0.2) + Phase2(0.35) = collision at 0.55s; default +1s buffer")]
+    public float popupDelay = 1.55f;
+
+    IEnumerator WaitForMatchThenCheckWinLose()
+    {
+        yield return new WaitForSeconds(popupDelay);
+        CheckWinLose();
+    }
+
+    IEnumerator ShowRewardDelayed(SpecialTileRewardSO reward, bool boardEmpty)
+    {
+        yield return new WaitForSeconds(popupDelay);
+        System.Action onClose = boardEmpty
+            ? (System.Action)(() => StartCoroutine(ShowVictoryDelayed()))
+            : () => CheckWinLose();
+        GameHUD.Instance?.ShowMessage(reward, onClose);
+    }
+
     IEnumerator ShowVictoryDelayed()
     {
-        yield return new WaitForSeconds(victoryDelay);
+        yield return null; // wait one frame for cleanup
         var gm2 = GameManager.Instance;
         int before = gm2 != null ? gm2.TotalScore : 0;
         gm2?.AddScore(winBonus);
@@ -308,7 +350,6 @@ public class BoardManager : MonoBehaviour
         int maxPossible = (_totalTileCount / 2) * pointsPerMatch + winBonus;
         int stars = gm2 != null ? gm2.OnLevelComplete(maxPossible) : 1;
         GameHUD.Instance?.ShowVictory(before, after, stars);
-        Debug.Log($"You win! Stars: {stars} | score: {before} → {after}");
     }
 
     bool IsShuffleUseless()
@@ -360,7 +401,6 @@ public class BoardManager : MonoBehaviour
         if (isAnimating) return;
         if (GameManager.Instance != null && !GameManager.Instance.SpendScore(GameManager.Instance.shuffleCost))
         {
-            Debug.Log("Not enough score for shuffle");
             return;
         }
         StartCoroutine(ShuffleAnimation());
@@ -461,7 +501,11 @@ public class BoardManager : MonoBehaviour
 
         if (visualSettings.useAtlas && atlasMaterials != null && mats.Length > 1)
         {
-            mats[1] = atlasMaterials[visualSettings.GetAtlasIndex(data)];
+            int idx = data.reward != null
+                ? data.reward.atlasIndex
+                : visualSettings.GetAtlasIndex(data);
+            idx = Mathf.Clamp(idx, 0, atlasMaterials.Length - 1);
+            mats[1] = atlasMaterials[idx];
             rend.sharedMaterials = mats;
             view.SetSelected(false);
         }
