@@ -15,3 +15,4 @@ MonoBehaviour:
   levelName: Pyramide
   previewSprite: {fileID: 21300000, guid: a0c52cff2aa5940a48777446d5965cfd, type: 3}
   mapPosition: {x: -450, y: 150}
+  maxTileTypes: 20

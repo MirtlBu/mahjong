@@ -1,4 +1,4 @@
-using System.Collections;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -7,15 +7,19 @@ public class GameHUD : MonoBehaviour
 {
     public static GameHUD Instance { get; private set; }
 
-    [Header("3D Buttons")]
-    [SerializeField] private GameObject hintButtonObject;
-    [SerializeField] private GameObject shuffleButtonObject;
+    [Serializable]
+    public class PowerUpButton
+    {
+        public string id;            // "hint", "shuffle", "bomb", etc.
+        public Button button;
+        public int unlockAtLevel;    // 0 = доступно с первого уровня
+    }
+
+    [Header("Power-Ups")]
+    [SerializeField] private PowerUpButton[] powerUpButtons;
 
     [Header("Score")]
     [SerializeField] private TMP_Text scoreLabel;
-
-[Header("No Moves")]
-    [SerializeField] private TMP_Text noMovesLabel;
 
     [Header("Navigation")]
     [SerializeField] private Button backButton;
@@ -24,54 +28,72 @@ public class GameHUD : MonoBehaviour
     [SerializeField] private GameObject victoryPanel;
     [SerializeField] private StarsDisplay victoryStars;
     [SerializeField] private ParticleSystem[] confettiSystems;
+    [SerializeField] private Button okButton;
+
+    [Header("Defeat")]
+    [SerializeField] private GameObject loosePanel;
+    [SerializeField] private TMP_Text noMovesLabel;
+    [SerializeField] private Button looseOkButton;
 
     void Awake()
     {
         if (Instance != null) { Destroy(gameObject); return; }
         Instance = this;
 
-        if (victoryPanel != null)
-            victoryPanel.SetActive(false);
-        if (noMovesLabel != null)
-            noMovesLabel.gameObject.SetActive(false);
+        if (victoryPanel != null) victoryPanel.SetActive(false);
+        if (loosePanel != null)   loosePanel.SetActive(false);
     }
 
     void Start()
     {
-        var hint = hintButtonObject?.GetComponentInChildren<ButtonView>();
-        if (hint != null) hint.OnClick += () => BoardManager.Instance?.ShowHint();
-
-        var shuffle = shuffleButtonObject?.GetComponentInChildren<ButtonView>();
-        if (shuffle != null) shuffle.OnClick += () => BoardManager.Instance?.Shuffle();
-
-        backButton?.onClick.AddListener(() =>
+        foreach (var p in powerUpButtons)
         {
-            Debug.Log("Back button clicked — abandoning level");
-            GameManager.Instance?.AbandonLevel();
-        });
+            var captured = p;
+            captured.button?.onClick.AddListener(() => OnPowerUpClicked(captured.id));
+        }
 
+        backButton?.onClick.AddListener(() => GameManager.Instance?.AbandonLevel());
+        okButton?.onClick.AddListener(OnOkClicked);
+        looseOkButton?.onClick.AddListener(OnOkClicked);
+
+        RefreshPowerUps();
         RefreshResourceCounts();
+    }
+
+    void OnPowerUpClicked(string id)
+    {
+        switch (id)
+        {
+            case "hint":    BoardManager.Instance?.ShowHint(); break;
+            case "shuffle": BoardManager.Instance?.Shuffle();  break;
+            case "bomb":    BoardManager.Instance?.UseBomb();  break;
+        }
+    }
+
+    [Header("Debug")]
+    [SerializeField] private bool showAllPowerUps = true; // TODO: убрать после настройки
+
+    public void RefreshPowerUps()
+    {
+        int levelIndex = GameManager.Instance != null ? GameManager.Instance.CurrentLevelIndex : 0;
+        foreach (var p in powerUpButtons)
+            if (p.button != null)
+                p.button.gameObject.SetActive(showAllPowerUps || levelIndex >= p.unlockAtLevel);
     }
 
     public void RefreshResourceCounts() { }
 
     public void ShowNoMoves(bool isGameOver)
     {
-        if (noMovesLabel == null) return;
-        var canvas = noMovesLabel.GetComponentInParent<Canvas>(true);
-        if (canvas != null)
-        {
-            canvas.gameObject.SetActive(true);
-            foreach (var t in canvas.GetComponentsInChildren<TMP_Text>(true))
-                t.gameObject.SetActive(t == noMovesLabel);
-        }
-        noMovesLabel.gameObject.SetActive(true);
-        noMovesLabel.text = isGameOver ? GameStrings.GameOver : GameStrings.NoMovesUseShuffle;
+        if (noMovesLabel != null)
+            noMovesLabel.text = isGameOver ? GameStrings.GameOver : GameStrings.NoMovesUseShuffle;
+        if (loosePanel != null)
+            loosePanel.SetActive(true);
     }
 
     public void HideNoMoves()
     {
-        if (noMovesLabel != null) noMovesLabel.gameObject.SetActive(false);
+        if (loosePanel != null) loosePanel.SetActive(false);
     }
 
     public void SetScore(int score)
@@ -95,16 +117,20 @@ public class GameHUD : MonoBehaviour
             victoryPanel.SetActive(false);
     }
 
+    void OnOkClicked()
+    {
+        GameManager.Instance?.ReturnToMap();
+    }
+
     public void ShowVictory(int fromScore, int toScore, int stars)
     {
+        int gained = toScore - fromScore;
+        Debug.Log($"[PlusScore] from={fromScore} to={toScore} gained={gained} instance={PlusScoreLabel.Instance}");
         if (victoryPanel != null)
         {
             victoryPanel.SetActive(true);
-            foreach (var t in victoryPanel.GetComponentsInChildren<TMP_Text>(true))
-                t.gameObject.SetActive(t != noMovesLabel);
+            PlusScoreLabel.Instance?.Show(gained);
         }
-        if (noMovesLabel != null)
-            noMovesLabel.gameObject.SetActive(false);
 
         victoryStars?.Show(stars);
 

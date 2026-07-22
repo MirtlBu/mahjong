@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -20,9 +19,6 @@ public class GameManager : MonoBehaviour
     public int hintCost    = 10;
     public int shuffleCost = 25;
 
-    [Header("Victory")]
-    [SerializeField] private float victoryToMapDelay  = 3f;
-    [SerializeField] private float gameOverToMapDelay = 5f;
 
     public int CurrentLevelIndex { get; private set; } = -1;
 
@@ -105,7 +101,6 @@ public class GameManager : MonoBehaviour
     public void OnGameOver()
     {
         SaveProgress();
-        StartCoroutine(ReturnToMapAfterDelay(gameOverToMapDelay));
     }
 
     // Returns stars earned (1-3)
@@ -118,8 +113,12 @@ public class GameManager : MonoBehaviour
         LevelProgress.SetCompleted(CurrentLevelIndex);
         LevelProgress.SetStars(CurrentLevelIndex, stars);
         SaveProgress();
-        StartCoroutine(ReturnToMapAfterDelay(victoryToMapDelay));
         return stars;
+    }
+
+    public void ReturnToMap()
+    {
+        SceneManager.LoadScene(mapSceneName);
     }
 
     static int CalculateStars(int scoreEarned, int maxPossibleScore)
@@ -131,11 +130,7 @@ public class GameManager : MonoBehaviour
         return 1;
     }
 
-    IEnumerator ReturnToMapAfterDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        SceneManager.LoadScene(mapSceneName);
-    }
+
 
 #if UNITY_EDITOR
     [ContextMenu("Debug: Reset All Progress")]

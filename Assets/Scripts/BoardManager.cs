@@ -111,7 +111,8 @@ public class BoardManager : MonoBehaviour
             ? levelLayout.GetPositions()
             : TurtleLayout.GetPositions();
 
-        List<TileData> tileSet = GenerateTileSet(layout.Count);
+        int maxTypes = levelLayout != null ? levelLayout.maxTileTypes : 0;
+        List<TileData> tileSet = GenerateTileSet(layout.Count, maxTypes);
         ShuffleTiles(tileSet);
 
         int count = tileSet.Count; // may be layout.Count-1 if layout has odd number of positions
@@ -271,7 +272,7 @@ public class BoardManager : MonoBehaviour
     }
 
     [Header("Victory Delay")]
-    public float victoryDelay = 1.2f;
+    public float victoryDelay = 1f;
 
     void CheckWinLose()
     {
@@ -323,7 +324,7 @@ public class BoardManager : MonoBehaviour
         return false;
     }
 
-    List<TileData> GenerateTileSet(int count)
+    List<TileData> GenerateTileSet(int count, int maxTypes = 0)
     {
         // Build pool of unique tile types
         var types = new List<TileData>();
@@ -334,6 +335,9 @@ public class BoardManager : MonoBehaviour
             types.Add(new TileData(TileSuit.Winds, v));
         for (int v = 1; v <= 3; v++)
             types.Add(new TileData(TileSuit.Dragons, v));
+
+        if (maxTypes > 0 && maxTypes < types.Count)
+            types = types.GetRange(0, maxTypes);
 
         // Generate exactly count tiles in pairs, cycling through types
         count = (count / 2) * 2; // ensure even
@@ -348,6 +352,8 @@ public class BoardManager : MonoBehaviour
         }
         return tiles;
     }
+
+    public void UseBomb() { /* TODO: реализовать бомбу */ }
 
     public void Shuffle()
     {

@@ -35,12 +35,14 @@ public class LevelNodeUI : MonoBehaviour
 
         if (lockOverlay != null) lockOverlay.SetActive(!unlocked);
         if (button != null) button.interactable = unlocked;
+        if (levelNameLabel != null) levelNameLabel.gameObject.SetActive(unlocked);
 
         if (starsDisplay != null)
         {
-            int stars = LevelProgress.GetStars(levelIndex);
-            if (stars > 0) starsDisplay.Show(stars);
-            else starsDisplay.Hide();
+            if (unlocked)
+                starsDisplay.Show(LevelProgress.GetStars(levelIndex));
+            else
+                starsDisplay.Hide();
         }
     }
 }

@@ -15,3 +15,4 @@ MonoBehaviour:
   levelName: Turtle
   previewSprite: {fileID: 21300000, guid: 0ccac45a27ccd44e1bb6b5070bd374d0, type: 3}
   mapPosition: {x: -750, y: 150}
+  maxTileTypes: 12
