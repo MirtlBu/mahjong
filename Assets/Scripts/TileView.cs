@@ -21,6 +21,7 @@ public class TileView : MonoBehaviour
     private bool isFree = true;
 
     public bool IsSelected { get; private set; }
+    [HideInInspector] public float baseScale = 1f;
 
     void Awake()
     {
@@ -43,7 +44,7 @@ public class TileView : MonoBehaviour
     public void SetSelected(bool selected)
     {
         IsSelected = selected;
-        transform.localScale = selected ? Vector3.one * 1.05f : Vector3.one;
+        transform.localScale = Vector3.one * (selected ? baseScale * 1.05f : baseScale);
         ApplyVisualState();
         if (onSelect != null)
         {
@@ -158,7 +159,7 @@ public class TileView : MonoBehaviour
         while (t < 1f)
         {
             t += Time.deltaTime / 0.2f;
-            float s = 1f - Mathf.SmoothStep(0f, 1f, t);
+            float s = baseScale * (1f - Mathf.SmoothStep(0f, 1f, t));
             transform.localScale = Vector3.one * s;
             yield return null;
         }

@@ -60,6 +60,7 @@ public class GameHUD : MonoBehaviour
         }
 
         backButton?.onClick.AddListener(() => GameManager.Instance?.AbandonLevel());
+        Debug.Log($"[HUD] okButton={okButton}, looseOkButton={looseOkButton}");
         okButton?.onClick.AddListener(OnOkClicked);
         looseOkButton?.onClick.AddListener(OnOkClicked);
         messageOkButton?.onClick.AddListener(OnMessageOkClicked);
@@ -151,6 +152,7 @@ public class GameHUD : MonoBehaviour
 
     void OnOkClicked()
     {
+        Debug.Log($"[OK] clicked, GameManager={GameManager.Instance}");
         GameManager.Instance?.ReturnToMap();
     }
 

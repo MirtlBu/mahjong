@@ -8,6 +8,7 @@ public class BoardManager : MonoBehaviour
 
     [Header("Tile")]
     public GameObject tilePrefab;
+    public float tileScale  = 1.0f;
     public float tileWidth  = 2.0f;
     public float tileHeight = 3.0f;
     public float tileDepth  = 1.05f;
@@ -89,6 +90,7 @@ public class BoardManager : MonoBehaviour
         BuildBoard();
     }
 
+    [ContextMenu("Rebuild Board")]
     public void Rebuild()
     {
         if (selectedTile != null)
@@ -149,8 +151,10 @@ public class BoardManager : MonoBehaviour
         float worldZ = -layer * tileDepth;
 
         GameObject go = Instantiate(tilePrefab, new Vector3(worldX, worldY, worldZ), Quaternion.identity);
+        go.transform.localScale = Vector3.one * tileScale;
 
         TileView view = go.GetComponent<TileView>();
+        view.baseScale = tileScale;
         view.SetData(data);
 
         if (visualSettings != null)
